@@ -215,46 +215,54 @@ namespace Com.TailChaser.Editor.UI.Controls
 
             for (int i = 0; i < m_Positions.Length; ++i)
             {
-                Color color = m_Palette[i];
-
-                float hue = color.GetHue();
-                float sat = color.GetSaturation();
-                float lightness = color.GetBrightness();
-
-                if ((lightness < 0.1)
-                    || (lightness > 0.9)
-                    || (sat < 0.1))
+                if (i == m_Palette.TransparentIndex)
                 {
-                    // Black/white/grey
-
-                    m_Positions[i].x = (2.0f * lightness) - 1.0f;
-                    m_Positions[i].y = -1.0f;
+                    m_Positions[i].x = 0;
+                    m_Positions[i].y = 0;
                 }
                 else
                 {
-                    // Colors
+                    Color color = m_Palette[i];
 
-                    // There are conflicting colors
-                    // for instance RGB(255, 0, 0) and RGB(170, 85, 85)
-                    // which are HSL(0, 1, 1/2) and HSL(0, 1/3, 1/2)
-                    // i.e. same hue, same lightness, but one is
-                    // desaturated.
-                    //
-                    // Put these along the bottom
+                    float hue = color.GetHue();
+                    float sat = color.GetSaturation();
+                    float lightness = color.GetBrightness();
 
-                    if ((sat > 0.332) && (sat < 0.334)
-                        && (lightness > 0.499) && (lightness < 0.501))
+                    if ((lightness < 0.1)
+                        || (lightness > 0.9)
+                        || (sat < 0.1))
                     {
-                        m_Positions[i].x = -1.0f + (2.0f * (hue + 30.0f) / 360.0f);
-                        m_Positions[i].y = 1.0f;
+                        // Black/white/grey
+
+                        m_Positions[i].x = (2.0f * lightness) - 1.0f;
+                        m_Positions[i].y = -1.0f;
                     }
                     else
                     {
-                        float angle = hue;
-                        float radius = lightness;
+                        // Colors
 
-                        m_Positions[i].x = radius * (float)Math.Cos(angle / 180.0f * Math.PI);
-                        m_Positions[i].y = radius * (float)Math.Sin(angle / 180.0f * Math.PI);
+                        // There are conflicting colors
+                        // for instance RGB(255, 0, 0) and RGB(170, 85, 85)
+                        // which are HSL(0, 1, 1/2) and HSL(0, 1/3, 1/2)
+                        // i.e. same hue, same lightness, but one is
+                        // desaturated.
+                        //
+                        // Put these along the bottom
+
+                        if ((sat > 0.332) && (sat < 0.334)
+                            && (lightness > 0.499) && (lightness < 0.501))
+                        {
+                            m_Positions[i].x = -1.0f + (2.0f * (hue + 30.0f) / 360.0f);
+                            m_Positions[i].y = 1.0f;
+                        }
+                        else
+                        {
+                            float angle = hue;
+                            float radius = lightness;
+
+                            m_Positions[i].x = radius * (float)Math.Cos(angle / 180.0f * Math.PI);
+                            m_Positions[i].y = radius * (float)Math.Sin(angle / 180.0f * Math.PI);
+                        }
                     }
                 }
             }

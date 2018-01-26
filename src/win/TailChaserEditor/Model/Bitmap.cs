@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Com.TailChaser.Editor.Model
 {
+    public delegate void OnBitmapChangedDelegate(Bitmap bitmap);
+
     public class Bitmap
     {
         public Bitmap(Palette palette)
@@ -13,9 +15,13 @@ namespace Com.TailChaser.Editor.Model
             m_Palette = palette;
             m_Pixels = new int[WIDTH * HEIGHT];
 
+            int init = palette.TransparentIndex;
+
             for (int i = 0; i < m_Pixels.Length; ++i)
-                m_Pixels[i] = 0;
+                m_Pixels[i] = init;
         }
+
+        public event OnBitmapChangedDelegate OnChanged;
 
         public Palette Palette
         {
@@ -62,7 +68,17 @@ namespace Com.TailChaser.Editor.Model
                 if ((value < 0) || (value >= m_Palette.Length))
                     throw new ArgumentOutOfRangeException("value");
 
-                m_Pixels[x + y * WIDTH] = value;
+                int index = x + y * WIDTH;
+
+                int old_value = m_Pixels[index];
+
+                m_Pixels[index] = value;
+
+                if ((old_value != value)
+                    && (OnChanged != null))
+                {
+                    OnChanged(this);
+                }
 
             }
         }

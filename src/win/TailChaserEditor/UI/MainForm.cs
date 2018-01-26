@@ -18,6 +18,9 @@ namespace Com.TailChaser.Editor.UI
 
             m_EditUndoMenuItem.Enabled = m_UndoRedoBuffer.UndoAvailable;
             m_EditRedoMenuItem.Enabled = m_UndoRedoBuffer.RedoAvailable;
+
+            m_Scheme = new Model.Scheme(m_PaletteView.Palette);
+            m_SchemeView.Scheme = m_Scheme;
         }
 
         private void m_FileExitMenuItem_Click(object sender, EventArgs e)
@@ -43,6 +46,18 @@ namespace Com.TailChaser.Editor.UI
         private void m_UndoRedoBuffer_OnRedoAvailableChanged(Controls.UndoRedoBuffer source)
         {
             m_EditRedoMenuItem.Enabled = m_UndoRedoBuffer.RedoAvailable;
+        }
+
+        private Model.Scheme m_Scheme;
+
+        private void m_ViewEditMenuItem_Click(object sender, EventArgs e)
+        {
+            m_MainTabs.SelectedIndex = 0;
+        }
+
+        private void m_ViewSimulateMenuItem_Click(object sender, EventArgs e)
+        {
+            m_MainTabs.SelectedIndex = 1;
         }
     }
 }

@@ -11,17 +11,30 @@ namespace Com.TailChaser.Editor.Model
     {
         public Palette()
         {
-            m_Name = "6-bit Palette";
-            m_Colors = new Color[64];
-            m_TransparentIndex = 0;
+            //m_Name = "6-bit Palette";
+            //m_Colors = new Color[64];
+            //m_TransparentIndex = 0;
 
-            for (int i = 0; i < 64; ++i)
+            //for (int i = 0; i < 64; ++i)
+            //{
+            //    int red = i % 4;
+            //    int green = (i / 4) % 4;
+            //    int blue = (i / 16) % 4;
+
+            //    m_Colors[i] = Color.FromArgb(red * 255 / 3, green * 255 / 3, blue * 255 / 3);
+            //}
+
+            m_Name = "27-color Palette";
+            m_Colors = new Color[28];
+            m_TransparentIndex = 27;
+
+            for (int i = 0; i < 27; ++i)
             {
-                int red = i % 4;
-                int green = (i / 4) % 4;
-                int blue = (i / 16) % 4;
+                int red = i % 3;
+                int green = (i / 3) % 3;
+                int blue = (i / 9) % 3;
 
-                m_Colors[i] = Color.FromArgb(red * 255 / 3, green * 255 / 3, blue * 255 / 3);
+                m_Colors[i] = Color.FromArgb(red * 255 / 2, green * 255 / 2, blue * 255 / 2);
             }
         }
 

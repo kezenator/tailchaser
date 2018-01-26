@@ -74,7 +74,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\Bitmap.cs" />
+    <Compile Include="Model\Layer.cs" />
     <Compile Include="Model\Palette.cs" />
+    <Compile Include="Model\Scheme.cs" />
+    <Compile Include="Model\SignalMask.cs" />
+    <Compile Include="Model\SignalSet.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Controls\BitmapView.cs">
@@ -83,11 +87,32 @@
     <Compile Include="UI\Controls\BitmapView.Designer.cs">
       <DependentUpon>BitmapView.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Controls\DoubleBufferedListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\LayerListView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\LayerListView.Designer.cs">
+      <DependentUpon>LayerListView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Controls\LayerView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\LayerView.Designer.cs">
+      <DependentUpon>LayerView.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Controls\PaletteView.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="UI\Controls\PaletteView.Designer.cs">
       <DependentUpon>PaletteView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Controls\SchemeView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\SchemeView.Designer.cs">
+      <DependentUpon>SchemeView.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\Controls\UndoRedoBuffer.cs">
       <SubType>Component</SubType>
@@ -111,6 +136,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\Controls\LayerListView.resx">
+      <DependentUpon>LayerListView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Controls\LayerView.resx">
+      <DependentUpon>LayerView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Controls\SchemeView.resx">
+      <DependentUpon>SchemeView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
