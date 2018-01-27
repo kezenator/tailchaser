@@ -43,6 +43,12 @@ namespace Com.TailChaser.Editor.Model
             m_Value &= (SignalMask)~mask;
         }
 
+        public bool ConditionIsMatchedByState(SignalSet other)
+        {
+            return (((m_Mask & other.m_Mask) == m_Mask)
+                && ((m_Mask & other.m_Value) == m_Value));
+        }
+
         public override bool Equals(object obj)
         {
             if (obj == null)

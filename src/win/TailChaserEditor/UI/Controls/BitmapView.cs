@@ -21,7 +21,7 @@ namespace Com.TailChaser.Editor.UI.Controls
             DoubleBuffered = true;
 
             m_PaletteView = null;
-            m_RequestedBitmap = null;
+            m_DisplayedBitmap = null;
             m_EditingBitmap = null;
             m_UndoRedoBuffer = null;
         }
@@ -51,12 +51,14 @@ namespace Com.TailChaser.Editor.UI.Controls
         {
             get
             {
-                return m_RequestedBitmap;
+                return m_DisplayedBitmap;
             }
 
             set
             {
-                m_RequestedBitmap = value;
+                m_DisplayedBitmap = value;
+
+                Invalidate();
 
                 UpdateSelectedEditingBitmap();
             }
@@ -84,23 +86,23 @@ namespace Com.TailChaser.Editor.UI.Controls
 
             // Draw bitmap's non-transparent pixels (if any...)
 
-            if (m_EditingBitmap != null)
+            if (m_DisplayedBitmap != null)
             {
-                for (int x = 0; x < m_EditingBitmap.Width; ++x)
+                for (int x = 0; x < m_DisplayedBitmap.Width; ++x)
                 {
-                    for (int y = 0; y < m_EditingBitmap.Height; ++y)
+                    for (int y = 0; y < m_DisplayedBitmap.Height; ++y)
                     {
-                        int palette_index = m_EditingBitmap[x, y];
+                        int palette_index = m_DisplayedBitmap[x, y];
 
-                        if (!m_EditingBitmap.Palette.IsTransparent(palette_index))
+                        if (!m_DisplayedBitmap.Palette.IsTransparent(palette_index))
                         {
                             Rectangle rect = new Rectangle(
-                                x * Width / m_EditingBitmap.Width,
-                                y * Height / m_EditingBitmap.Height,
-                                Width / m_EditingBitmap.Width + 1,
-                                Height / m_EditingBitmap.Height + 1);
+                                x * Width / m_DisplayedBitmap.Width,
+                                y * Height / m_DisplayedBitmap.Height,
+                                Width / m_DisplayedBitmap.Width + 1,
+                                Height / m_DisplayedBitmap.Height + 1);
 
-                            using (Brush b = new SolidBrush(m_EditingBitmap.Palette[palette_index]))
+                            using (Brush b = new SolidBrush(m_DisplayedBitmap.Palette[palette_index]))
                                 e.Graphics.FillRectangle(b, rect);
                         }
                     }
@@ -111,17 +113,17 @@ namespace Com.TailChaser.Editor.UI.Controls
 
             using (Pen p = new Pen(Color.FromKnownColor(KnownColor.WindowFrame), 1.0f))
             {
-                if (m_EditingBitmap != null)
+                if (m_DisplayedBitmap != null)
                 {
-                    for (int x = 0; x < m_EditingBitmap.Width; ++x)
+                    for (int x = 0; x < m_DisplayedBitmap.Width; ++x)
                     {
-                        int px = x * Width / m_EditingBitmap.Width;
+                        int px = x * Width / m_DisplayedBitmap.Width;
                         e.Graphics.DrawLine(p, px, 0, px, Height);
                     }
 
-                    for (int y = 0; y < m_EditingBitmap.Height; ++y)
+                    for (int y = 0; y < m_DisplayedBitmap.Height; ++y)
                     {
-                        int py = y * Height / m_EditingBitmap.Height;
+                        int py = y * Height / m_DisplayedBitmap.Height;
                         e.Graphics.DrawLine(p, 0, py, Width, py);
                     }
                 }
@@ -175,12 +177,12 @@ namespace Com.TailChaser.Editor.UI.Controls
         {
             Model.Bitmap new_editing = null;
 
-            if ((m_RequestedBitmap != null)
+            if ((m_DisplayedBitmap != null)
                 && (m_PaletteView != null)
                 && (m_PaletteView.Palette != null)
-                && m_PaletteView.Palette.Equals(m_RequestedBitmap.Palette))
+                && m_PaletteView.Palette.Equals(m_DisplayedBitmap.Palette))
             {
-                new_editing = m_RequestedBitmap;
+                new_editing = m_DisplayedBitmap;
             }
 
             if (new_editing != m_EditingBitmap)
@@ -192,8 +194,6 @@ namespace Com.TailChaser.Editor.UI.Controls
 
                 if (m_EditingBitmap != null)
                     m_EditingBitmap.OnChanged += OnBitmapChanged;
-
-                Invalidate();
             }
         }
 
@@ -251,7 +251,7 @@ namespace Com.TailChaser.Editor.UI.Controls
         }
 
         private PaletteView m_PaletteView;
-        private Model.Bitmap m_RequestedBitmap;
+        private Model.Bitmap m_DisplayedBitmap;
         private Model.Bitmap m_EditingBitmap;
         private UndoRedoBuffer m_UndoRedoBuffer;
     }

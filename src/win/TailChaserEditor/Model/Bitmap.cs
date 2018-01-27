@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -80,6 +81,17 @@ namespace Com.TailChaser.Editor.Model
                     OnChanged(this);
                 }
 
+            }
+        }
+
+        public void CombineWith(Bitmap other)
+        {
+            Debug.Assert(m_Palette.Equals(other.m_Palette));
+
+            for (int i = 0; i < m_Pixels.Length; ++i)
+            {
+                if (!other.m_Palette.IsTransparent(other.m_Pixels[i]))
+                    m_Pixels[i] = other.m_Pixels[i];
             }
         }
 

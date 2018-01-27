@@ -21,6 +21,7 @@ namespace Com.TailChaser.Editor.UI
 
             m_Scheme = new Model.Scheme(m_PaletteView.Palette);
             m_SchemeView.Scheme = m_Scheme;
+            m_SimulatorView.Scheme = m_Scheme;
         }
 
         private void m_FileExitMenuItem_Click(object sender, EventArgs e)
@@ -58,6 +59,31 @@ namespace Com.TailChaser.Editor.UI
         private void m_ViewSimulateMenuItem_Click(object sender, EventArgs e)
         {
             m_MainTabs.SelectedIndex = 1;
+        }
+
+        private void m_SimulateTailMenuItem_Click(object sender, EventArgs e)
+        {
+            ToggleSimulate(m_SimulateTailMenuItem, Model.SignalMask.Tail);
+        }
+
+        private void m_SimulateBrakeMenuItem_Click(object sender, EventArgs e)
+        {
+            ToggleSimulate(m_SimulateBrakeMenuItem, Model.SignalMask.Brake);
+        }
+
+        private void m_SimulateReverseMenuItem_Click(object sender, EventArgs e)
+        {
+            ToggleSimulate(m_SimulateReverseMenuItem, Model.SignalMask.Reverse);
+        }
+
+        private void m_SimulateIndicatorMenuItem_Click(object sender, EventArgs e)
+        {
+            ToggleSimulate(m_SimulateIndicatorMenuItem, Model.SignalMask.IndicatorSolid);
+        }
+
+        private void ToggleSimulate(ToolStripMenuItem menu_item, Model.SignalMask signal_mask)
+        {
+            m_SimulatorView.ToggleSignal(signal_mask);
         }
     }
 }

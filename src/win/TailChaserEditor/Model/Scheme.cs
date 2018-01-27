@@ -93,6 +93,14 @@ namespace Com.TailChaser.Editor.Model
             return layer;
         }
 
+        public IEnumerable<Layer> Layers
+        {
+            get
+            {
+                return new List<Layer>(m_Layers);
+            }
+        }
+
         private Palette m_Palette;
         private string m_Name;
         private string m_Description;

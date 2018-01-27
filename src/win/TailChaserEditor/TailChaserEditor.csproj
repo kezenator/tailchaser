@@ -114,6 +114,12 @@
     <Compile Include="UI\Controls\SchemeView.Designer.cs">
       <DependentUpon>SchemeView.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Controls\SimulatorView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\Controls\SimulatorView.Designer.cs">
+      <DependentUpon>SimulatorView.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Controls\UndoRedoBuffer.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -144,6 +150,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\Controls\SchemeView.resx">
       <DependentUpon>SchemeView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Controls\SimulatorView.resx">
+      <DependentUpon>SimulatorView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
