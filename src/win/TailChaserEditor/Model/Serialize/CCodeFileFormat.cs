@@ -56,7 +56,7 @@ namespace Com.TailChaser.Editor.Model.Serialize
 
                 int num_bits = bitmap.Palette.NumBits;
 
-                for (int x = 0; x < bitmap.Height; ++x)
+                for (int x = 0; x < bitmap.Width; ++x)
                 {
                     int index = bitmap[x, y];
 

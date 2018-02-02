@@ -42,12 +42,12 @@ namespace Com.TailChaser.Editor.Model.Serialize
                 sb.Append("   ");
                 foreach (byte b in entry.Key)
                 {
-                    sb.AppendFormat(" {0:X2},", b);
+                    sb.AppendFormat(" 0x{0:X2},", b);
                 }
 
                 if (entry.Key.Length < max_binary_length)
                 {
-                    sb.Append(new string(' ', 4 * (max_binary_length - entry.Key.Length)));
+                    sb.Append(new string(' ', 6 * (max_binary_length - entry.Key.Length)));
                 }
 
                 sb.Append(" /* ");

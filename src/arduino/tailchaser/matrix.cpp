@@ -61,7 +61,8 @@ void Matrix::showNextRow()
     
     // Clock out the data
 
-    for (int i = 0; i < WIDTH; ++i)
+    OutputBits *bits = m_outputBuffers[m_DisplayIndex][m_DitherIndex].bits[m_RowIndex];
+    for (int i = 0; i < WIDTH; ++i, ++bits)
     {
         // Write data bits
         
@@ -69,9 +70,9 @@ void Matrix::showNextRow()
         PORTG &= ~0x20;
         PORTH &= ~0x18;
 
-        PORTE |= m_outputBuffers[m_DisplayIndex][m_DitherIndex].port_e_data[m_RowIndex][i];
-        PORTG |= m_outputBuffers[m_DisplayIndex][m_DitherIndex].port_g_data[m_RowIndex][i];
-        PORTH |= m_outputBuffers[m_DisplayIndex][m_DitherIndex].port_h_data[m_RowIndex][i];
+        PORTE |= bits->port_e;
+        PORTG |= bits->port_g;
+        PORTH |= bits->port_h;
 
         // Toggle clock
 
@@ -206,12 +207,12 @@ void Matrix::swapBuffers()
             if (color & 0x10) h1 |= 0x10;
             if (color & 0x20) h2 |= 0x10;
 
-            m_outputBuffers[back_buffer][0].port_e_data[row][column] = e1;
-            m_outputBuffers[back_buffer][0].port_g_data[row][column] = g1;
-            m_outputBuffers[back_buffer][0].port_h_data[row][column] = h1;
-            m_outputBuffers[back_buffer][1].port_e_data[row][column] = e2;
-            m_outputBuffers[back_buffer][1].port_g_data[row][column] = g2;
-            m_outputBuffers[back_buffer][1].port_h_data[row][column] = h2;
+            m_outputBuffers[back_buffer][0].bits[row][column].port_e = e1;
+            m_outputBuffers[back_buffer][0].bits[row][column].port_g = g1;
+            m_outputBuffers[back_buffer][0].bits[row][column].port_h = h1;
+            m_outputBuffers[back_buffer][1].bits[row][column].port_e = e2;
+            m_outputBuffers[back_buffer][1].bits[row][column].port_g = g2;
+            m_outputBuffers[back_buffer][1].bits[row][column].port_h = h2;
         }
     }
 

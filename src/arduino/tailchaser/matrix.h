@@ -47,11 +47,16 @@ private:
 
     static uint8_t PaletteColorToBits(uint8_t color);
 
+    struct OutputBits
+    {
+        uint8_t port_e;
+        uint8_t port_g;
+        uint8_t port_h;
+    };
+
     struct OutputBuffer
     {
-        uint8_t port_e_data[DISPLAY_ROWS][WIDTH];
-        uint8_t port_g_data[DISPLAY_ROWS][WIDTH];
-        uint8_t port_h_data[DISPLAY_ROWS][WIDTH];
+        OutputBits bits[DISPLAY_ROWS][WIDTH];
     };
 
     struct Measure
