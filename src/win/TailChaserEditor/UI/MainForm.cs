@@ -39,6 +39,11 @@ namespace Com.TailChaser.Editor.UI
             m_UndoRedoBuffer.Redo();
         }
 
+        private void m_UndoRedoBuffer_OnDocumentChanged(Controls.UndoRedoBuffer source)
+        {
+            m_SimulatorView.RequestRecalculate();
+        }
+
         private void m_UndoRedoBuffer_OnUndoAvailableChanged(Controls.UndoRedoBuffer source)
         {
             m_EditUndoMenuItem.Enabled = m_UndoRedoBuffer.UndoAvailable;
@@ -48,8 +53,6 @@ namespace Com.TailChaser.Editor.UI
         {
             m_EditRedoMenuItem.Enabled = m_UndoRedoBuffer.RedoAvailable;
         }
-
-        private Model.Scheme m_Scheme;
 
         private void m_ViewEditMenuItem_Click(object sender, EventArgs e)
         {
@@ -85,5 +88,23 @@ namespace Com.TailChaser.Editor.UI
         {
             m_SimulatorView.ToggleSignal(signal_mask);
         }
+
+        private void m_FileSaveMenuItem_Click(object sender, EventArgs e)
+        {
+            // TODO - file save dialog, update title bar etc.
+
+            try
+            {
+                string contents = Model.Serialize.CCodeFileFormat.Serialize(m_Scheme);
+
+                MessageBox.Show(contents, "Contents");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private Model.Scheme m_Scheme;
     }
 }

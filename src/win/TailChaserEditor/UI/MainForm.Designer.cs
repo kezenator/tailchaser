@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            Com.TailChaser.Editor.Model.Palette palette2 = new Com.TailChaser.Editor.Model.Palette();
+            Com.TailChaser.Editor.Model.Palette palette1 = new Com.TailChaser.Editor.Model.Palette();
             this.m_MenuStrip = new System.Windows.Forms.MenuStrip();
             this.m_FileMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.m_FileExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -39,20 +39,21 @@
             this.m_ViewMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.m_ViewEditMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_ViewSimulateMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.m_MainTabs = new System.Windows.Forms.TabControl();
-            this.m_EditTab = new System.Windows.Forms.TabPage();
-            this.m_SimulateTab = new System.Windows.Forms.TabPage();
             this.m_SimulateMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.m_SimulateTailMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_SimulateBrakeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_SimulateReverseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_SimulateIndicatorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.m_MainTabs = new System.Windows.Forms.TabControl();
+            this.m_EditTab = new System.Windows.Forms.TabPage();
             this.m_SchemeView = new Com.TailChaser.Editor.UI.Controls.SchemeView();
             this.m_LayerView = new Com.TailChaser.Editor.UI.Controls.LayerView();
             this.m_BitmapView = new Com.TailChaser.Editor.UI.Controls.BitmapView();
             this.m_PaletteView = new Com.TailChaser.Editor.UI.Controls.PaletteView();
             this.m_UndoRedoBuffer = new Com.TailChaser.Editor.UI.Controls.UndoRedoBuffer(this.components);
+            this.m_SimulateTab = new System.Windows.Forms.TabPage();
             this.m_SimulatorView = new Com.TailChaser.Editor.UI.Controls.SimulatorView();
+            this.m_FileSaveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_MenuStrip.SuspendLayout();
             this.m_MainTabs.SuspendLayout();
             this.m_EditTab.SuspendLayout();
@@ -75,6 +76,7 @@
             // m_FileMenu
             // 
             this.m_FileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.m_FileSaveMenuItem,
             this.m_FileExitMenuItem});
             this.m_FileMenu.Name = "m_FileMenu";
             this.m_FileMenu.Size = new System.Drawing.Size(37, 20);
@@ -83,7 +85,7 @@
             // m_FileExitMenuItem
             // 
             this.m_FileExitMenuItem.Name = "m_FileExitMenuItem";
-            this.m_FileExitMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.m_FileExitMenuItem.Size = new System.Drawing.Size(152, 22);
             this.m_FileExitMenuItem.Text = "E&xit";
             this.m_FileExitMenuItem.Click += new System.EventHandler(this.m_FileExitMenuItem_Click);
             // 
@@ -137,6 +139,49 @@
             this.m_ViewSimulateMenuItem.Text = "&Simulate";
             this.m_ViewSimulateMenuItem.Click += new System.EventHandler(this.m_ViewSimulateMenuItem_Click);
             // 
+            // m_SimulateMenu
+            // 
+            this.m_SimulateMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.m_SimulateTailMenuItem,
+            this.m_SimulateBrakeMenuItem,
+            this.m_SimulateReverseMenuItem,
+            this.m_SimulateIndicatorMenuItem});
+            this.m_SimulateMenu.Name = "m_SimulateMenu";
+            this.m_SimulateMenu.Size = new System.Drawing.Size(65, 20);
+            this.m_SimulateMenu.Text = "&Simulate";
+            // 
+            // m_SimulateTailMenuItem
+            // 
+            this.m_SimulateTailMenuItem.Name = "m_SimulateTailMenuItem";
+            this.m_SimulateTailMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.m_SimulateTailMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.m_SimulateTailMenuItem.Text = "&Tail";
+            this.m_SimulateTailMenuItem.Click += new System.EventHandler(this.m_SimulateTailMenuItem_Click);
+            // 
+            // m_SimulateBrakeMenuItem
+            // 
+            this.m_SimulateBrakeMenuItem.Name = "m_SimulateBrakeMenuItem";
+            this.m_SimulateBrakeMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
+            this.m_SimulateBrakeMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.m_SimulateBrakeMenuItem.Text = "&Brake";
+            this.m_SimulateBrakeMenuItem.Click += new System.EventHandler(this.m_SimulateBrakeMenuItem_Click);
+            // 
+            // m_SimulateReverseMenuItem
+            // 
+            this.m_SimulateReverseMenuItem.Name = "m_SimulateReverseMenuItem";
+            this.m_SimulateReverseMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F8;
+            this.m_SimulateReverseMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.m_SimulateReverseMenuItem.Text = "&Reverse";
+            this.m_SimulateReverseMenuItem.Click += new System.EventHandler(this.m_SimulateReverseMenuItem_Click);
+            // 
+            // m_SimulateIndicatorMenuItem
+            // 
+            this.m_SimulateIndicatorMenuItem.Name = "m_SimulateIndicatorMenuItem";
+            this.m_SimulateIndicatorMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F9;
+            this.m_SimulateIndicatorMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.m_SimulateIndicatorMenuItem.Text = "&Indicator";
+            this.m_SimulateIndicatorMenuItem.Click += new System.EventHandler(this.m_SimulateIndicatorMenuItem_Click);
+            // 
             // m_MainTabs
             // 
             this.m_MainTabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -165,60 +210,6 @@
             this.m_EditTab.Text = "Edit (F4)";
             this.m_EditTab.UseVisualStyleBackColor = true;
             // 
-            // m_SimulateTab
-            // 
-            this.m_SimulateTab.Controls.Add(this.m_SimulatorView);
-            this.m_SimulateTab.Location = new System.Drawing.Point(4, 29);
-            this.m_SimulateTab.Name = "m_SimulateTab";
-            this.m_SimulateTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_SimulateTab.Size = new System.Drawing.Size(1170, 738);
-            this.m_SimulateTab.TabIndex = 1;
-            this.m_SimulateTab.Text = "Simulate (F5)";
-            this.m_SimulateTab.UseVisualStyleBackColor = true;
-            // 
-            // m_SimulateMenu
-            // 
-            this.m_SimulateMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.m_SimulateTailMenuItem,
-            this.m_SimulateBrakeMenuItem,
-            this.m_SimulateReverseMenuItem,
-            this.m_SimulateIndicatorMenuItem});
-            this.m_SimulateMenu.Name = "m_SimulateMenu";
-            this.m_SimulateMenu.Size = new System.Drawing.Size(65, 20);
-            this.m_SimulateMenu.Text = "&Simulate";
-            // 
-            // m_SimulateTailMenuItem
-            // 
-            this.m_SimulateTailMenuItem.Name = "m_SimulateTailMenuItem";
-            this.m_SimulateTailMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.m_SimulateTailMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.m_SimulateTailMenuItem.Text = "&Tail";
-            this.m_SimulateTailMenuItem.Click += new System.EventHandler(this.m_SimulateTailMenuItem_Click);
-            // 
-            // m_SimulateBrakeMenuItem
-            // 
-            this.m_SimulateBrakeMenuItem.Name = "m_SimulateBrakeMenuItem";
-            this.m_SimulateBrakeMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
-            this.m_SimulateBrakeMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.m_SimulateBrakeMenuItem.Text = "&Brake";
-            this.m_SimulateBrakeMenuItem.Click += new System.EventHandler(this.m_SimulateBrakeMenuItem_Click);
-            // 
-            // m_SimulateReverseMenuItem
-            // 
-            this.m_SimulateReverseMenuItem.Name = "m_SimulateReverseMenuItem";
-            this.m_SimulateReverseMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F8;
-            this.m_SimulateReverseMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.m_SimulateReverseMenuItem.Text = "&Reverse";
-            this.m_SimulateReverseMenuItem.Click += new System.EventHandler(this.m_SimulateReverseMenuItem_Click);
-            // 
-            // m_SimulateIndicatorMenuItem
-            // 
-            this.m_SimulateIndicatorMenuItem.Name = "m_SimulateIndicatorMenuItem";
-            this.m_SimulateIndicatorMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F9;
-            this.m_SimulateIndicatorMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.m_SimulateIndicatorMenuItem.Text = "&Indicator";
-            this.m_SimulateIndicatorMenuItem.Click += new System.EventHandler(this.m_SimulateIndicatorMenuItem_Click);
-            // 
             // m_SchemeView
             // 
             this.m_SchemeView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -244,6 +235,7 @@
             this.m_LayerView.Name = "m_LayerView";
             this.m_LayerView.Size = new System.Drawing.Size(303, 262);
             this.m_LayerView.TabIndex = 9;
+            this.m_LayerView.UndoRedoBuffer = this.m_UndoRedoBuffer;
             // 
             // m_BitmapView
             // 
@@ -265,15 +257,27 @@
             this.m_PaletteView.Location = new System.Drawing.Point(775, 437);
             this.m_PaletteView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_PaletteView.Name = "m_PaletteView";
-            this.m_PaletteView.Palette = palette2;
+            this.m_PaletteView.Palette = palette1;
             this.m_PaletteView.SelectedIndex = 0;
             this.m_PaletteView.Size = new System.Drawing.Size(392, 262);
             this.m_PaletteView.TabIndex = 10;
             // 
             // m_UndoRedoBuffer
             // 
-            this.m_UndoRedoBuffer.OnUndoAvailableChanged += new Com.TailChaser.Editor.UI.Controls.UndoRedoAvailableChangedDelegate(this.m_UndoRedoBuffer_OnUndoAvailableChanged);
-            this.m_UndoRedoBuffer.OnRedoAvailableChanged += new Com.TailChaser.Editor.UI.Controls.UndoRedoAvailableChangedDelegate(this.m_UndoRedoBuffer_OnRedoAvailableChanged);
+            this.m_UndoRedoBuffer.OnDocumentChanged += new Com.TailChaser.Editor.UI.Controls.UndoRedoChangedDelegate(this.m_UndoRedoBuffer_OnDocumentChanged);
+            this.m_UndoRedoBuffer.OnUndoAvailableChanged += new Com.TailChaser.Editor.UI.Controls.UndoRedoChangedDelegate(this.m_UndoRedoBuffer_OnUndoAvailableChanged);
+            this.m_UndoRedoBuffer.OnRedoAvailableChanged += new Com.TailChaser.Editor.UI.Controls.UndoRedoChangedDelegate(this.m_UndoRedoBuffer_OnRedoAvailableChanged);
+            // 
+            // m_SimulateTab
+            // 
+            this.m_SimulateTab.Controls.Add(this.m_SimulatorView);
+            this.m_SimulateTab.Location = new System.Drawing.Point(4, 29);
+            this.m_SimulateTab.Name = "m_SimulateTab";
+            this.m_SimulateTab.Padding = new System.Windows.Forms.Padding(3);
+            this.m_SimulateTab.Size = new System.Drawing.Size(1170, 738);
+            this.m_SimulateTab.TabIndex = 1;
+            this.m_SimulateTab.Text = "Simulate (F5)";
+            this.m_SimulateTab.UseVisualStyleBackColor = true;
             // 
             // m_SimulatorView
             // 
@@ -282,8 +286,16 @@
             this.m_SimulatorView.Location = new System.Drawing.Point(3, 3);
             this.m_SimulatorView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_SimulatorView.Name = "m_SimulatorView";
+            this.m_SimulatorView.Scheme = null;
             this.m_SimulatorView.Size = new System.Drawing.Size(1164, 732);
             this.m_SimulatorView.TabIndex = 0;
+            // 
+            // m_FileSaveMenuItem
+            // 
+            this.m_FileSaveMenuItem.Name = "m_FileSaveMenuItem";
+            this.m_FileSaveMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileSaveMenuItem.Text = "&Save...";
+            this.m_FileSaveMenuItem.Click += new System.EventHandler(this.m_FileSaveMenuItem_Click);
             // 
             // MainForm
             // 
@@ -331,5 +343,6 @@
         private System.Windows.Forms.ToolStripMenuItem m_SimulateBrakeMenuItem;
         private System.Windows.Forms.ToolStripMenuItem m_SimulateReverseMenuItem;
         private System.Windows.Forms.ToolStripMenuItem m_SimulateIndicatorMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem m_FileSaveMenuItem;
     }
 }

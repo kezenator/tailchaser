@@ -93,6 +93,14 @@ namespace Com.TailChaser.Editor.Model
             return layer;
         }
 
+        public int NumLayers
+        {
+            get
+            {
+                return m_Layers.Count;
+            }
+        }
+
         public IEnumerable<Layer> Layers
         {
             get

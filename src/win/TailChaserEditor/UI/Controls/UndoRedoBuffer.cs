@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Com.TailChaser.Editor.UI.Controls
 {
-    public delegate void UndoRedoAvailableChangedDelegate(UndoRedoBuffer source);
+    public delegate void UndoRedoChangedDelegate(UndoRedoBuffer source);
 
     public partial class UndoRedoBuffer : Component
     {
@@ -38,6 +38,8 @@ namespace Com.TailChaser.Editor.UI.Controls
         {
             protected Entry(UndoRedoBuffer parent)
             {
+                Debug.Assert(parent != null);
+
                 m_Parent = parent;
                 m_CanBeModified = true;
             }
@@ -64,8 +66,9 @@ namespace Com.TailChaser.Editor.UI.Controls
             private bool m_CanBeModified;
         }
 
-        public event UndoRedoAvailableChangedDelegate OnUndoAvailableChanged;
-        public event UndoRedoAvailableChangedDelegate OnRedoAvailableChanged;
+        public event UndoRedoChangedDelegate OnDocumentChanged;
+        public event UndoRedoChangedDelegate OnUndoAvailableChanged;
+        public event UndoRedoChangedDelegate OnRedoAvailableChanged;
 
         public bool UndoAvailable
         {
@@ -93,6 +96,7 @@ namespace Com.TailChaser.Editor.UI.Controls
                 e.Undo();
 
                 UpdateAvailability();
+                NotifyDocumentChanged();
             }
         }
 
@@ -106,6 +110,7 @@ namespace Com.TailChaser.Editor.UI.Controls
                 e.Redo();
 
                 UpdateAvailability();
+                NotifyDocumentChanged();
             }
         }
 
@@ -115,6 +120,7 @@ namespace Com.TailChaser.Editor.UI.Controls
             m_RedoEntries.Clear();
 
             UpdateAvailability();
+            NotifyDocumentChanged();
         }
 
         private void UpdateAvailability()
@@ -141,6 +147,12 @@ namespace Com.TailChaser.Editor.UI.Controls
                     OnRedoAvailableChanged(this);
                 }
             }
+        }
+
+        private void NotifyDocumentChanged()
+        {
+            if (OnDocumentChanged != null)
+                OnDocumentChanged(this);
         }
 
         private Stack<Entry> m_UndoEntries;

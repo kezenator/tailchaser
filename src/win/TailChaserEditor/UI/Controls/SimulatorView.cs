@@ -52,6 +52,11 @@ namespace Com.TailChaser.Editor.UI.Controls
             }
         }
 
+        public void RequestRecalculate()
+        {
+            m_RedrawTimer.Start();
+        }
+
         public void ToggleSignal(Model.SignalMask signal)
         {
             SetSignal(signal, !m_CurrentState.IsSet(signal));

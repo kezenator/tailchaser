@@ -55,6 +55,7 @@
             this.m_NameTextBox.Name = "m_NameTextBox";
             this.m_NameTextBox.Size = new System.Drawing.Size(518, 25);
             this.m_NameTextBox.TabIndex = 1;
+            this.m_NameTextBox.TextChanged += new System.EventHandler(this.m_NameTextBox_TextChanged);
             // 
             // label2
             // 
@@ -73,6 +74,7 @@
             this.m_DescriptionTextBox.Name = "m_DescriptionTextBox";
             this.m_DescriptionTextBox.Size = new System.Drawing.Size(518, 25);
             this.m_DescriptionTextBox.TabIndex = 3;
+            this.m_DescriptionTextBox.TextChanged += new System.EventHandler(this.m_DescriptionTextBox_TextChanged);
             // 
             // label3
             // 
@@ -99,9 +101,11 @@
             this.m_LayerListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_LayerListView.LayerView = null;
             this.m_LayerListView.Location = new System.Drawing.Point(3, 123);
             this.m_LayerListView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_LayerListView.Name = "m_LayerListView";
+            this.m_LayerListView.Scheme = null;
             this.m_LayerListView.Size = new System.Drawing.Size(518, 408);
             this.m_LayerListView.TabIndex = 5;
             // 

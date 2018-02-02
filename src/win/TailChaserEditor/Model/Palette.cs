@@ -65,6 +65,14 @@ namespace Com.TailChaser.Editor.Model
             }
         }
 
+        public int NumBits
+        {
+            get
+            {
+                return (int)Math.Ceiling(Math.Log(m_Colors.Length) / Math.Log(2));
+            }
+        }
+
         public Color this[int index]
         {
             get

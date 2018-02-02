@@ -17,6 +17,7 @@ namespace Com.TailChaser.Editor.UI.Controls
             InitializeComponent();
 
             m_BitmapView = null;
+            m_UndoRedoBuffer = null;
             m_Layer = null;
             UpdateDisplay();
         }
@@ -57,6 +58,19 @@ namespace Com.TailChaser.Editor.UI.Controls
                         }
                     }
                 }
+            }
+        }
+
+        public UndoRedoBuffer UndoRedoBuffer
+        {
+            get
+            {
+                return m_UndoRedoBuffer;
+            }
+
+            set
+            {
+                m_UndoRedoBuffer = value;
             }
         }
 
@@ -171,6 +185,7 @@ namespace Com.TailChaser.Editor.UI.Controls
         {
             if (m_Layer != null)
             {
+                Model.SignalSet old_value = m_Layer.SignalSet;
                 Model.SignalSet new_value = m_Layer.SignalSet;
 
                 switch (check_state)
@@ -186,7 +201,11 @@ namespace Com.TailChaser.Editor.UI.Controls
                     break;
                 }
 
-                m_Layer.SignalSet = new_value;
+                if (!new_value.Equals(old_value))
+                {
+                    UndoRedoBuffer.Entry entry = new SignalSetUndoEntry(m_UndoRedoBuffer, m_Layer, old_value, new_value);
+                    entry.PerformAndPushUndo();
+                }
             }
         }
 
@@ -223,7 +242,33 @@ namespace Com.TailChaser.Editor.UI.Controls
             UpdateLayerMask(Model.SignalMask.IndicatorSolid, m_IndicatorSolidCheckbox.CheckState);
         }
 
+        private class SignalSetUndoEntry : UndoRedoBuffer.Entry
+        {
+            public SignalSetUndoEntry(UndoRedoBuffer parent, Model.Layer layer, Model.SignalSet old_value, Model.SignalSet new_value)
+                : base(parent)
+            {
+                m_Layer = layer;
+                m_OldValue = old_value;
+                m_NewValue = new_value;
+            }
+
+            public override void Undo()
+            {
+                m_Layer.SignalSet = m_OldValue;
+            }
+
+            public override void Redo()
+            {
+                m_Layer.SignalSet = m_NewValue;
+            }
+
+            private Model.Layer m_Layer;
+            private Model.SignalSet m_OldValue;
+            private Model.SignalSet m_NewValue;
+        }
+
         private BitmapView m_BitmapView;
+        private UndoRedoBuffer m_UndoRedoBuffer;
         private Model.Layer m_Layer;
     }
 }

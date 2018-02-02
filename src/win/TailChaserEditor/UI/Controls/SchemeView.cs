@@ -31,6 +31,9 @@ namespace Com.TailChaser.Editor.UI.Controls
                 if (m_Scheme != null)
                 {
                     // Remove old event handlers
+
+                    m_Scheme.OnNameChanged -= OnNameChanged;
+                    m_Scheme.OnDescriptionChanged -= OnDescriptionChanged;
                 }
 
                 // Save value
@@ -38,6 +41,12 @@ namespace Com.TailChaser.Editor.UI.Controls
                 m_Scheme = value;
 
                 // Add new event handlers
+
+                if (m_Scheme != null)
+                {
+                    m_Scheme.OnNameChanged += OnNameChanged;
+                    m_Scheme.OnDescriptionChanged += OnDescriptionChanged;
+                }
 
                 // Update UI
 
@@ -74,6 +83,38 @@ namespace Com.TailChaser.Editor.UI.Controls
             m_NameTextBox.Enabled = has_scheme;
             m_DescriptionTextBox.Enabled = has_scheme;
             m_AddLayerButton.Enabled = has_scheme;
+        }
+
+        private void OnNameChanged(Model.Scheme s)
+        {
+            if (s == m_Scheme)
+            {
+                m_NameTextBox.Text = m_Scheme.Name;
+            }
+        }
+
+        private void OnDescriptionChanged(Model.Scheme s)
+        {
+            if (s == m_Scheme)
+            {
+                m_DescriptionTextBox.Text = m_Scheme.Description;
+            }
+        }
+
+        private void m_NameTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (m_Scheme != null)
+            {
+                m_Scheme.Name = m_NameTextBox.Text;
+            }
+        }
+
+        private void m_DescriptionTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (m_Scheme != null)
+            {
+                m_Scheme.Description = m_DescriptionTextBox.Text;
+            }
         }
 
         private Model.Scheme m_Scheme;
