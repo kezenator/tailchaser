@@ -13,9 +13,9 @@ namespace Com.TailChaser.Editor.Model.Serialize
             m_Lines = new List<string>();
         }
 
-        public void AddMultilineComment(IEnumerable<string> comment_lines)
+        public void AddMultilineDeoxygenComment(IEnumerable<string> comment_lines)
         {
-            m_Lines.Add("/*");
+            m_Lines.Add("/**");
             foreach (string line in comment_lines)
                 m_Lines.Add(" * " + line);
             m_Lines.Add(" */");

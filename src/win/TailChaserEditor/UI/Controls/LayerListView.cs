@@ -43,10 +43,33 @@ namespace Com.TailChaser.Editor.UI.Controls
                     m_Scheme = value;
 
                     // Add new event handlers
+                    // and update the UI
 
                     if (m_Scheme != null)
                     {
                         m_Scheme.OnLayerListChanged += OnSchemeLayerListChanged;
+
+                        m_ListView.Items.Clear();
+
+                        foreach (Model.Layer layer in m_Scheme.Layers)
+                        {
+                            ListViewItem item = new ListViewItem("");
+                            item.Tag = layer;
+                            m_ListView.Items.Add(item);
+
+                            layer.OnChange += OnLayerChanged;
+                        }
+                    }
+                    else
+                    {
+                        m_ListView.Items.Clear();
+                    }
+
+                    m_ListView.SelectedItems.Clear();
+
+                    if (m_LayerView != null)
+                    {
+                        m_LayerView.Layer = null;
                     }
                 }
             }
@@ -97,7 +120,7 @@ namespace Com.TailChaser.Editor.UI.Controls
         {
             if (add)
             {
-                ListViewItem item = new ListViewItem(index.ToString());
+                ListViewItem item = new ListViewItem("");
                 item.Tag = layer;
                 m_ListView.Items.Insert(index, item);
 

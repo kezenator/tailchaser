@@ -1,5 +1,9 @@
-/*
- * TailChaser Scheme, format 2018-02-03
+/**
+ * @file
+ * 
+ * TailChaser scheme "default_scheme"
+ * 
+ * Format: TailChaser Scheme, version 2018-02-03
  */
 #ifndef __SCHEME__default_scheme_H__
 #define __SCHEME__default_scheme_H__
@@ -7,7 +11,7 @@
 #include <stdint.h>
 #include <stddef.h>
 const size_t default_scheme_size = 1356;
-const unsigned char default_scheme[1356] PROGMEM =
+const uint8_t default_scheme[1356] PROGMEM =
 {
     0x0E, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6C, 0x74, 0x5F, 0x73, 0x63, 0x68, 0x65, 0x6D, 0x65,                                                 /* Name: "default_scheme" */
     0x16, 0x53, 0x74, 0x72, 0x65, 0x65, 0x74, 0x20, 0x4C, 0x65, 0x67, 0x61, 0x6C, 0x20, 0x28, 0x44, 0x65, 0x66, 0x61, 0x75, 0x6C, 0x74, 0x29, /* Description: "Street Legal (Default)" */

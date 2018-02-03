@@ -77,9 +77,11 @@
     <Compile Include="Model\Layer.cs" />
     <Compile Include="Model\Palette.cs" />
     <Compile Include="Model\Scheme.cs" />
+    <Compile Include="Model\Serialize\BinaryDeserializer.cs" />
     <Compile Include="Model\Serialize\BinarySerializer.cs" />
     <Compile Include="Model\Serialize\BitStuffer.cs" />
     <Compile Include="Model\Serialize\CCodeFileFormat.cs" />
+    <Compile Include="Model\Serialize\TextDeserializer.cs" />
     <Compile Include="Model\Serialize\TextSerializer.cs" />
     <Compile Include="Model\SignalMask.cs" />
     <Compile Include="Model\SignalSet.cs" />

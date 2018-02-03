@@ -52,6 +52,17 @@ namespace Com.TailChaser.Editor.UI.Controls
 
                 m_LayerListView.Scheme = value;
                 UpdateEnables();
+
+                if (m_Scheme != null)
+                {
+                    m_NameTextBox.Text = m_Scheme.Name;
+                    m_DescriptionTextBox.Text = m_Scheme.Description;
+                }
+                else
+                {
+                    m_NameTextBox.Text = "";
+                    m_DescriptionTextBox.Text = "";
+                }
             }
         }
 

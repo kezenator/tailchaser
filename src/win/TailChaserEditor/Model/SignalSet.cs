@@ -8,6 +8,14 @@ namespace Com.TailChaser.Editor.Model
 {
     public struct SignalSet
     {
+        public static SignalSet FromMaskAndValue(byte mask, byte value)
+        {
+            SignalSet result;
+            result.m_Mask = (SignalMask)mask;
+            result.m_Value = (SignalMask)value;
+            return result;
+        }
+
         public byte GetMaskAsByte()
         {
             return (byte)m_Mask;

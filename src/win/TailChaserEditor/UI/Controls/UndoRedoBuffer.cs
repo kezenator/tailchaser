@@ -86,6 +86,14 @@ namespace Com.TailChaser.Editor.UI.Controls
             }
         }
 
+        public void Clear()
+        {
+            m_UndoEntries.Clear();
+            m_RedoEntries.Clear();
+
+            UpdateAvailability();
+        }
+
         public void Undo()
         {
             if (m_UndoEntries.Count > 0)

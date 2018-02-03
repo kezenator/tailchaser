@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
             Com.TailChaser.Editor.Model.Palette palette1 = new Com.TailChaser.Editor.Model.Palette();
             this.m_MenuStrip = new System.Windows.Forms.MenuStrip();
             this.m_FileMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,12 +50,16 @@
             this.m_EditTab = new System.Windows.Forms.TabPage();
             this.m_SimulateTab = new System.Windows.Forms.TabPage();
             this.m_SaveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.m_FileOpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.m_FileSaveAsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_SchemeView = new Com.TailChaser.Editor.UI.Controls.SchemeView();
             this.m_LayerView = new Com.TailChaser.Editor.UI.Controls.LayerView();
             this.m_BitmapView = new Com.TailChaser.Editor.UI.Controls.BitmapView();
             this.m_PaletteView = new Com.TailChaser.Editor.UI.Controls.PaletteView();
             this.m_UndoRedoBuffer = new Com.TailChaser.Editor.UI.Controls.UndoRedoBuffer(this.components);
             this.m_SimulatorView = new Com.TailChaser.Editor.UI.Controls.SimulatorView();
+            this.m_OpenFileDialog = new System.Windows.Forms.OpenFileDialog();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.m_MenuStrip.SuspendLayout();
             this.m_MainTabs.SuspendLayout();
             this.m_EditTab.SuspendLayout();
@@ -77,7 +82,10 @@
             // m_FileMenu
             // 
             this.m_FileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.m_FileOpenMenuItem,
             this.m_FileSaveMenuItem,
+            this.m_FileSaveAsMenuItem,
+            toolStripSeparator1,
             this.m_FileExitMenuItem});
             this.m_FileMenu.Name = "m_FileMenu";
             this.m_FileMenu.Size = new System.Drawing.Size(37, 20);
@@ -87,7 +95,7 @@
             // 
             this.m_FileSaveMenuItem.Name = "m_FileSaveMenuItem";
             this.m_FileSaveMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.m_FileSaveMenuItem.Text = "&Save...";
+            this.m_FileSaveMenuItem.Text = "&Save";
             this.m_FileSaveMenuItem.Click += new System.EventHandler(this.m_FileSaveMenuItem_Click);
             // 
             // m_FileExitMenuItem
@@ -234,6 +242,25 @@
             this.m_SaveFileDialog.DefaultExt = "h";
             this.m_SaveFileDialog.Filter = "C/C++ Header Files|*.h|All Files|*.*";
             // 
+            // m_FileOpenMenuItem
+            // 
+            this.m_FileOpenMenuItem.Name = "m_FileOpenMenuItem";
+            this.m_FileOpenMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileOpenMenuItem.Text = "&Open...";
+            this.m_FileOpenMenuItem.Click += new System.EventHandler(this.m_FileOpenMenuItem_Click);
+            // 
+            // m_FileSaveAsMenuItem
+            // 
+            this.m_FileSaveAsMenuItem.Name = "m_FileSaveAsMenuItem";
+            this.m_FileSaveAsMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileSaveAsMenuItem.Text = "Save &as...";
+            this.m_FileSaveAsMenuItem.Click += new System.EventHandler(this.m_FileSaveAsMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            // 
             // m_SchemeView
             // 
             this.m_SchemeView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -244,7 +271,7 @@
             this.m_SchemeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_SchemeView.Name = "m_SchemeView";
             this.m_SchemeView.Scheme = null;
-            this.m_SchemeView.Size = new System.Drawing.Size(275, 698);
+            this.m_SchemeView.Size = new System.Drawing.Size(275, 670);
             this.m_SchemeView.TabIndex = 7;
             // 
             // m_LayerView
@@ -253,7 +280,7 @@
             this.m_LayerView.BitmapView = this.m_BitmapView;
             this.m_LayerView.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_LayerView.Layer = null;
-            this.m_LayerView.Location = new System.Drawing.Point(281, 436);
+            this.m_LayerView.Location = new System.Drawing.Point(281, 408);
             this.m_LayerView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_LayerView.MinimumSize = new System.Drawing.Size(303, 262);
             this.m_LayerView.Name = "m_LayerView";
@@ -271,14 +298,14 @@
             this.m_BitmapView.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.m_BitmapView.Name = "m_BitmapView";
             this.m_BitmapView.PaletteView = this.m_PaletteView;
-            this.m_BitmapView.Size = new System.Drawing.Size(883, 419);
+            this.m_BitmapView.Size = new System.Drawing.Size(883, 391);
             this.m_BitmapView.TabIndex = 11;
             this.m_BitmapView.UndoRedoBuffer = this.m_UndoRedoBuffer;
             // 
             // m_PaletteView
             // 
             this.m_PaletteView.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_PaletteView.Location = new System.Drawing.Point(775, 433);
+            this.m_PaletteView.Location = new System.Drawing.Point(775, 405);
             this.m_PaletteView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_PaletteView.Name = "m_PaletteView";
             this.m_PaletteView.Palette = palette1;
@@ -302,6 +329,12 @@
             this.m_SimulatorView.Scheme = null;
             this.m_SimulatorView.Size = new System.Drawing.Size(1164, 736);
             this.m_SimulatorView.TabIndex = 0;
+            // 
+            // m_OpenFileDialog
+            // 
+            this.m_OpenFileDialog.DefaultExt = "h";
+            this.m_OpenFileDialog.FileName = "openFileDialog1";
+            this.m_OpenFileDialog.Filter = "C/C++ Header Files|*.h|All Files|*.*";
             // 
             // MainForm
             // 
@@ -351,5 +384,8 @@
         private System.Windows.Forms.ToolStripMenuItem m_SimulateIndicatorMenuItem;
         private System.Windows.Forms.ToolStripMenuItem m_FileSaveMenuItem;
         private System.Windows.Forms.SaveFileDialog m_SaveFileDialog;
+        private System.Windows.Forms.ToolStripMenuItem m_FileOpenMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem m_FileSaveAsMenuItem;
+        private System.Windows.Forms.OpenFileDialog m_OpenFileDialog;
     }
 }
