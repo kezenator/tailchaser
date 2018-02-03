@@ -109,26 +109,37 @@ void Matrix::showNextRow()
 {
     Measure measure(m_MaxRowTimeMicros);
     
-    // Clock out the data
+    // First, we need to clock out 32-pixels of
+    // 6 bits of data for the RGB values for 2
+    // of the 16 rows.
+    //
+    // Port E and G only contain
+    // the data bits - so we can write directly to them.
+    //
+    // Port H contains two data bits (PH3 and PH4) as
+    // well as the CLK (PH5) and OE (PH5).
+    //
+    // CLK and OE are both low at this point in time -
+    // so we can directly write to port H as well.
+    // (because swapBuffers sets all other bits of
+    // the port H data to zero).
+    //
+    // The final two writes to port H are to toggle the clock.
+    //
+    // Also, the loop across 32 pixels has been unrolled.
 
     OutputBits *bits = m_outputBuffers[m_DisplayIndex][m_DitherIndex].bits[m_RowIndex];
-    for (int i = 0; i < WIDTH; ++i, ++bits)
-    {
-        // Write data bits
-        
-        PORTE &= ~0x38;
-        PORTG &= ~0x20;
-        PORTH &= ~0x18;
 
-        PORTE |= bits->port_e;
-        PORTG |= bits->port_g;
-        PORTH |= bits->port_h;
+#define CLOCK_1_BIT   PORTE = bits->port_e; PORTG = bits->port_g; PORTH = bits->port_h; PORTH |= 0x20; PORTH &= ~0x20; ++bits;
+#define CLOCK_4_BITS  CLOCK_1_BIT  CLOCK_1_BIT  CLOCK_1_BIT  CLOCK_1_BIT
+#define CLOCK_16_BITS CLOCK_4_BITS CLOCK_4_BITS CLOCK_4_BITS CLOCK_4_BITS
 
-        // Toggle clock
+    CLOCK_16_BITS
+    CLOCK_16_BITS
 
-        PORTH |= 0x20;
-        PORTH &= ~0x20;
-    }
+#undef CLOCK_16_BITS
+#undef CLOCK_4_BITS
+#undef CLOCK_1_BIT
 
     // Turn off the output enable by setting it high
 
