@@ -28,6 +28,11 @@ void Terminal::print(const char *str)
     m_stream.print(str);
 }
 
+void Terminal::println(const char *str)
+{
+    m_stream.println(str);
+}
+
 void Terminal::printInt(int val)
 {
     m_stream.print(val);

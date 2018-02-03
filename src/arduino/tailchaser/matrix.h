@@ -38,6 +38,12 @@ public:
     void showNextRow();
     void printStats(Terminal &terminal) const;
 
+    void setPixel(uint8_t x, uint8_t y, uint8_t color)
+    {
+        if ((x < WIDTH) && (y < HEIGHT))
+            m_Bitmap[y][x] = color;
+    }
+
     void fillScreen(uint8_t color);
     void fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t color);
 

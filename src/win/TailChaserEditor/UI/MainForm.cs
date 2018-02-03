@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -91,17 +92,18 @@ namespace Com.TailChaser.Editor.UI
 
         private void m_FileSaveMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO - file save dialog, update title bar etc.
-
-            try
+            if (m_SaveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string contents = Model.Serialize.CCodeFileFormat.Serialize(m_Scheme);
+                try
+                {
+                    string contents = Model.Serialize.CCodeFileFormat.Serialize(m_Scheme);
 
-                MessageBox.Show(contents, "Contents");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error saving file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    File.WriteAllText(m_SaveFileDialog.FileName, contents);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error saving file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

@@ -80,7 +80,7 @@ void Matrix::init()
     m_MaxDrawTimeMicros = 0;
     m_MaxCalcTimeMicros = 0;
 
-    fillScreen(1);
+    fillScreen(0);
     swapBuffers();
 
     g_activeMatrix = this;

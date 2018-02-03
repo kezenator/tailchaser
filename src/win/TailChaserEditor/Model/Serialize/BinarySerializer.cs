@@ -11,7 +11,16 @@ namespace Com.TailChaser.Editor.Model.Serialize
         public BinarySerializer()
         {
             m_Lines = new List<KeyValuePair<byte[], string>>();
+            m_TotalBytes = 0;
             m_CurLine = new List<byte>();
+        }
+
+        public int TotalBytes
+        {
+            get
+            {
+                return m_TotalBytes;
+            }
         }
 
         public List<KeyValuePair<byte[], string>> Lines
@@ -24,6 +33,7 @@ namespace Com.TailChaser.Editor.Model.Serialize
 
         public void CommitLine(string comment)
         {
+            m_TotalBytes += m_CurLine.Count;
             m_Lines.Add(new KeyValuePair<byte[], string>(m_CurLine.ToArray(), comment));
             m_CurLine = new List<byte>();
         }
@@ -63,6 +73,7 @@ namespace Com.TailChaser.Editor.Model.Serialize
         }
 
         List<KeyValuePair<byte[], string>> m_Lines;
+        int m_TotalBytes;
         List<byte> m_CurLine;
     }
 }

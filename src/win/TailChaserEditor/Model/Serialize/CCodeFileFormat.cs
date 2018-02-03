@@ -12,14 +12,9 @@ namespace Com.TailChaser.Editor.Model.Serialize
         {
             TextSerializer s = new TextSerializer();
 
-            s.AddMultilineComment(new string[] { "TailChaser Scheme, format 2018-01-30"});
-            s.AddLine("#include <avr/pgmspace.h>");
-            s.AddLine("const unsigned char " + scheme.Name + "[] PROGMEM =");
-            s.AddLine("{");
+            BinarySerializer bs = new BinarySerializer();
 
             {
-                BinarySerializer bs = new BinarySerializer();
-
                 bs.WriteLengthAndUtf8String(scheme.Name, "Invalid scheme name");
                 bs.CommitLineFormat("Name: \"{0}\"", scheme.Name);
                 bs.WriteLengthAndUtf8String(scheme.Description, "Invalid scheme description");
@@ -38,11 +33,21 @@ namespace Com.TailChaser.Editor.Model.Serialize
 
                     WriteBitmap(l.Bitmap, bs);
                 }
-
-                s.AddBinary(bs.Lines);
             }
 
+            s.AddMultilineComment(new string[] { "TailChaser Scheme, format 2018-02-03"});
+            s.AddLine("#ifndef __SCHEME__" + scheme.Name + "_H__");
+            s.AddLine("#define __SCHEME__" + scheme.Name + "_H__");
+            s.AddLine("#include <avr/pgmspace.h>");
+            s.AddLine("#include <stdint.h>");
+            s.AddLine("#include <stddef.h>");
+            s.AddLine("const size_t " + scheme.Name + "_size = " + bs.TotalBytes + ";");
+            s.AddLine("const unsigned char " + scheme.Name + "[" + bs.TotalBytes + "] PROGMEM =");
+            s.AddLine("{");
+            s.AddBinary(bs.Lines);
+
             s.AddLine("};");
+            s.AddLine("#endif // __SCHEME__" + scheme.Name + "_H__");
 
             return s.ToString();
         }

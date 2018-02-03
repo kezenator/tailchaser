@@ -22,6 +22,7 @@ public:
     void processInput();
 
     void print(const char *str);
+    void println(const char *str);
     void printInt(int val);
     void newLine();
 

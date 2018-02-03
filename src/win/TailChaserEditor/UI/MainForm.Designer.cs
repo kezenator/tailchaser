@@ -32,6 +32,7 @@
             Com.TailChaser.Editor.Model.Palette palette1 = new Com.TailChaser.Editor.Model.Palette();
             this.m_MenuStrip = new System.Windows.Forms.MenuStrip();
             this.m_FileMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.m_FileSaveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_FileExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_EditMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.m_EditUndoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,14 +47,14 @@
             this.m_SimulateIndicatorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_MainTabs = new System.Windows.Forms.TabControl();
             this.m_EditTab = new System.Windows.Forms.TabPage();
+            this.m_SimulateTab = new System.Windows.Forms.TabPage();
+            this.m_SaveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.m_SchemeView = new Com.TailChaser.Editor.UI.Controls.SchemeView();
             this.m_LayerView = new Com.TailChaser.Editor.UI.Controls.LayerView();
             this.m_BitmapView = new Com.TailChaser.Editor.UI.Controls.BitmapView();
             this.m_PaletteView = new Com.TailChaser.Editor.UI.Controls.PaletteView();
             this.m_UndoRedoBuffer = new Com.TailChaser.Editor.UI.Controls.UndoRedoBuffer(this.components);
-            this.m_SimulateTab = new System.Windows.Forms.TabPage();
             this.m_SimulatorView = new Com.TailChaser.Editor.UI.Controls.SimulatorView();
-            this.m_FileSaveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_MenuStrip.SuspendLayout();
             this.m_MainTabs.SuspendLayout();
             this.m_EditTab.SuspendLayout();
@@ -81,6 +82,13 @@
             this.m_FileMenu.Name = "m_FileMenu";
             this.m_FileMenu.Size = new System.Drawing.Size(37, 20);
             this.m_FileMenu.Text = "&File";
+            // 
+            // m_FileSaveMenuItem
+            // 
+            this.m_FileSaveMenuItem.Name = "m_FileSaveMenuItem";
+            this.m_FileSaveMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileSaveMenuItem.Text = "&Save...";
+            this.m_FileSaveMenuItem.Click += new System.EventHandler(this.m_FileSaveMenuItem_Click);
             // 
             // m_FileExitMenuItem
             // 
@@ -210,6 +218,22 @@
             this.m_EditTab.Text = "Edit (F4)";
             this.m_EditTab.UseVisualStyleBackColor = true;
             // 
+            // m_SimulateTab
+            // 
+            this.m_SimulateTab.Controls.Add(this.m_SimulatorView);
+            this.m_SimulateTab.Location = new System.Drawing.Point(4, 29);
+            this.m_SimulateTab.Name = "m_SimulateTab";
+            this.m_SimulateTab.Padding = new System.Windows.Forms.Padding(3);
+            this.m_SimulateTab.Size = new System.Drawing.Size(1170, 738);
+            this.m_SimulateTab.TabIndex = 1;
+            this.m_SimulateTab.Text = "Simulate (F5)";
+            this.m_SimulateTab.UseVisualStyleBackColor = true;
+            // 
+            // m_SaveFileDialog
+            // 
+            this.m_SaveFileDialog.DefaultExt = "h";
+            this.m_SaveFileDialog.Filter = "C/C++ Header Files|*.h|All Files|*.*";
+            // 
             // m_SchemeView
             // 
             this.m_SchemeView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -220,7 +244,7 @@
             this.m_SchemeView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_SchemeView.Name = "m_SchemeView";
             this.m_SchemeView.Scheme = null;
-            this.m_SchemeView.Size = new System.Drawing.Size(275, 702);
+            this.m_SchemeView.Size = new System.Drawing.Size(275, 698);
             this.m_SchemeView.TabIndex = 7;
             // 
             // m_LayerView
@@ -229,7 +253,7 @@
             this.m_LayerView.BitmapView = this.m_BitmapView;
             this.m_LayerView.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_LayerView.Layer = null;
-            this.m_LayerView.Location = new System.Drawing.Point(281, 440);
+            this.m_LayerView.Location = new System.Drawing.Point(281, 436);
             this.m_LayerView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_LayerView.MinimumSize = new System.Drawing.Size(303, 262);
             this.m_LayerView.Name = "m_LayerView";
@@ -247,14 +271,14 @@
             this.m_BitmapView.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.m_BitmapView.Name = "m_BitmapView";
             this.m_BitmapView.PaletteView = this.m_PaletteView;
-            this.m_BitmapView.Size = new System.Drawing.Size(883, 423);
+            this.m_BitmapView.Size = new System.Drawing.Size(883, 419);
             this.m_BitmapView.TabIndex = 11;
             this.m_BitmapView.UndoRedoBuffer = this.m_UndoRedoBuffer;
             // 
             // m_PaletteView
             // 
             this.m_PaletteView.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_PaletteView.Location = new System.Drawing.Point(775, 437);
+            this.m_PaletteView.Location = new System.Drawing.Point(775, 433);
             this.m_PaletteView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_PaletteView.Name = "m_PaletteView";
             this.m_PaletteView.Palette = palette1;
@@ -268,17 +292,6 @@
             this.m_UndoRedoBuffer.OnUndoAvailableChanged += new Com.TailChaser.Editor.UI.Controls.UndoRedoChangedDelegate(this.m_UndoRedoBuffer_OnUndoAvailableChanged);
             this.m_UndoRedoBuffer.OnRedoAvailableChanged += new Com.TailChaser.Editor.UI.Controls.UndoRedoChangedDelegate(this.m_UndoRedoBuffer_OnRedoAvailableChanged);
             // 
-            // m_SimulateTab
-            // 
-            this.m_SimulateTab.Controls.Add(this.m_SimulatorView);
-            this.m_SimulateTab.Location = new System.Drawing.Point(4, 29);
-            this.m_SimulateTab.Name = "m_SimulateTab";
-            this.m_SimulateTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_SimulateTab.Size = new System.Drawing.Size(1170, 738);
-            this.m_SimulateTab.TabIndex = 1;
-            this.m_SimulateTab.Text = "Simulate (F5)";
-            this.m_SimulateTab.UseVisualStyleBackColor = true;
-            // 
             // m_SimulatorView
             // 
             this.m_SimulatorView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -287,15 +300,8 @@
             this.m_SimulatorView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_SimulatorView.Name = "m_SimulatorView";
             this.m_SimulatorView.Scheme = null;
-            this.m_SimulatorView.Size = new System.Drawing.Size(1164, 732);
+            this.m_SimulatorView.Size = new System.Drawing.Size(1164, 736);
             this.m_SimulatorView.TabIndex = 0;
-            // 
-            // m_FileSaveMenuItem
-            // 
-            this.m_FileSaveMenuItem.Name = "m_FileSaveMenuItem";
-            this.m_FileSaveMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.m_FileSaveMenuItem.Text = "&Save...";
-            this.m_FileSaveMenuItem.Click += new System.EventHandler(this.m_FileSaveMenuItem_Click);
             // 
             // MainForm
             // 
@@ -344,5 +350,6 @@
         private System.Windows.Forms.ToolStripMenuItem m_SimulateReverseMenuItem;
         private System.Windows.Forms.ToolStripMenuItem m_SimulateIndicatorMenuItem;
         private System.Windows.Forms.ToolStripMenuItem m_FileSaveMenuItem;
+        private System.Windows.Forms.SaveFileDialog m_SaveFileDialog;
     }
 }
