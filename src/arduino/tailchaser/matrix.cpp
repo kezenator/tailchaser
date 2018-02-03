@@ -23,32 +23,15 @@
 
 Matrix *Matrix::g_activeMatrix = nullptr;
 
-// Defined the overall refresh-rate (in Hz),
-// plus the fraction of time the dithered pixels are off (numerator/denum)
-// plus the timer pre-scaler
-
-static constexpr uint16_t REFRESH_RATE = 80 * Matrix::DISPLAY_ROWS;
-static constexpr uint16_t OFF_NUMERATOR = 1;
-static constexpr uint16_t OFF_DENOM = 12;
 static constexpr uint16_t TIMER_PRESCALER = 8;
 
-// Calculate the number of timer counts for the on and off times
+static constexpr uint16_t MIN_CLKS = 1200;
+static constexpr uint16_t MID_CLKS = 4000;
+static constexpr uint16_t MAX_CLKS = 8000;
 
-static constexpr uint16_t OFF_COUNT = uint16_t(16000000ULL / TIMER_PRESCALER * (OFF_DENOM - OFF_NUMERATOR) / OFF_DENOM / REFRESH_RATE);
-static constexpr uint16_t ON_COUNT = uint16_t(16000000ULL / TIMER_PRESCALER * OFF_NUMERATOR / OFF_DENOM / REFRESH_RATE);
-
-// Check that we've got enough time to run the ISR
-// NOTE - the duration is an empirically determined from testing....
-
-static constexpr uint16_t ISR_DURATION_CLKS = 2000;
-
-static_assert(uint32_t(ISR_DURATION_CLKS) <= (uint32_t(OFF_COUNT) * uint32_t(TIMER_PRESCALER)), "Off time is too short");
-static_assert(uint32_t(ISR_DURATION_CLKS) <= (uint32_t(ON_COUNT) * uint32_t(TIMER_PRESCALER)), "On time is too short");
-
-// Timer works in increment until overflow mode - subtract from 16-bit max.
-
-static constexpr uint16_t OFF_TIMER_INIT = uint16_t(65536UL - OFF_COUNT);
-static constexpr uint16_t ON_TIMER_INIT = uint16_t(65536UL - ON_COUNT);
+static constexpr uint16_t MIN_TIMER_INIT = uint16_t(65536UL - (MIN_CLKS / TIMER_PRESCALER));
+static constexpr uint16_t MID_TIMER_INIT = uint16_t(65536UL - (MID_CLKS / TIMER_PRESCALER));
+static constexpr uint16_t MAX_TIMER_INIT = uint16_t(65536UL - (MAX_CLKS / TIMER_PRESCALER));
 
 void Matrix::init()
 {
@@ -80,7 +63,12 @@ void Matrix::init()
     m_MaxDrawTimeMicros = 0;
     m_MaxCalcTimeMicros = 0;
 
-    fillScreen(0);
+    // Swap buffers twice:
+    // 1) Once to zero a new buffer
+    // 2) Twice to display the zeroed buffer
+    //    and prepare a new one for drawing
+
+    swapBuffers();
     swapBuffers();
 
     g_activeMatrix = this;
@@ -89,7 +77,7 @@ void Matrix::init()
     TCCR1A = 0;
     TCCR1B = 0;
 
-    TCNT1 = ON_TIMER_INIT;
+    TCNT1 = MIN_TIMER_INIT;
     TCCR1B |= (1 << CS11);    // /8 prescaler 
     TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
     interrupts();             // enable all interrupts
@@ -98,16 +86,18 @@ void Matrix::init()
 ISR(TIMER1_OVF_vect)        
 {
     if (Matrix::g_activeMatrix->m_DitherIndex == 0)
-        TCNT1 = OFF_TIMER_INIT;
+        TCNT1 = MIN_TIMER_INIT;
+    else if (Matrix::g_activeMatrix->m_DitherIndex == 1)
+        TCNT1 = MID_TIMER_INIT;
     else
-        TCNT1 = ON_TIMER_INIT;
+        TCNT1 = MAX_TIMER_INIT;
     
     Matrix::g_activeMatrix->showNextRow();
 }
 
 void Matrix::showNextRow()
 {
-    Measure measure(m_MaxRowTimeMicros);
+    //Measure measure(m_MaxRowTimeMicros);
     
     // First, we need to clock out 32-pixels of
     // 6 bits of data for the RGB values for 2
@@ -167,7 +157,7 @@ void Matrix::showNextRow()
     if (m_RowIndex == DISPLAY_ROWS)
     {
         m_RowIndex = 0;
-        m_DitherIndex = (m_DitherIndex + 1) & 1;
+        m_DitherIndex = (m_DitherIndex + 1) % 3;
     }
 }
 
@@ -186,16 +176,97 @@ void Matrix::printStats(Terminal &terminal) const
     print_measurement("Calc", m_MaxCalcTimeMicros);
 }
 
-void Matrix::fillScreen(uint8_t color)
+void Matrix::_setPixel(uint8_t x, uint8_t y, uint16_t color)
 {
-    Measure measure(m_MaxDrawTimeMicros);
+    // NOTE - this function is private an assumes that the
+    // x and y co-ordinates are valid
     
-    memset(m_Bitmap, color, WIDTH * HEIGHT);
+    // Work out which buffer we're writing to
+
+    uint8_t back_buffer = m_DisplayIndex ^ 1;
+
+    // Calculate the pixel data to write out:
+    // 1) Each row display actually contains data for
+    //    two physical rows on the screen
+    // 2) Pin assignments are:
+    //      R1  PE4    R2 PE3
+    //      G1  PE5    G2 PH3
+    //      B1  PG5    B2 PH4
+
+    if (y < DISPLAY_ROWS)
+    {
+        // RGB1 signals
+
+        uint8_t e0 = m_outputBuffers[back_buffer][0].bits[y][x].port_e & ~0x30;
+        uint8_t g0 = m_outputBuffers[back_buffer][0].bits[y][x].port_g & ~0x20;
+        uint8_t e1 = m_outputBuffers[back_buffer][1].bits[y][x].port_e & ~0x30;
+        uint8_t g1 = m_outputBuffers[back_buffer][1].bits[y][x].port_g & ~0x20;
+        uint8_t e2 = m_outputBuffers[back_buffer][2].bits[y][x].port_e & ~0x30;
+        uint8_t g2 = m_outputBuffers[back_buffer][2].bits[y][x].port_g & ~0x20;
+
+        if (color & 0x0001) e0 |= 0x10;
+        if (color & 0x0002) e1 |= 0x10;
+        if (color & 0x0004) e2 |= 0x10;
+
+        if (color & 0x0008) e0 |= 0x20;
+        if (color & 0x0010) e1 |= 0x20;
+        if (color & 0x0020) e2 |= 0x20;
+
+        if (color & 0x0040) g0 |= 0x20;
+        if (color & 0x0080) g1 |= 0x20;
+        if (color & 0x0100) g2 |= 0x20;
+        
+        m_outputBuffers[back_buffer][0].bits[y][x].port_e = e0;
+        m_outputBuffers[back_buffer][0].bits[y][x].port_g = g0;
+        m_outputBuffers[back_buffer][1].bits[y][x].port_e = e1;
+        m_outputBuffers[back_buffer][1].bits[y][x].port_g = g1;
+        m_outputBuffers[back_buffer][2].bits[y][x].port_e = e2;
+        m_outputBuffers[back_buffer][2].bits[y][x].port_g = g2;
+    }
+    else
+    {
+        // RGB2 signals
+
+        uint8_t e0 = m_outputBuffers[back_buffer][0].bits[y - DISPLAY_ROWS][x].port_e & ~0x08;
+        uint8_t h0 = m_outputBuffers[back_buffer][0].bits[y - DISPLAY_ROWS][x].port_h & ~0x18;
+        uint8_t e1 = m_outputBuffers[back_buffer][1].bits[y - DISPLAY_ROWS][x].port_e & ~0x08;
+        uint8_t h1 = m_outputBuffers[back_buffer][1].bits[y - DISPLAY_ROWS][x].port_h & ~0x18;
+        uint8_t e2 = m_outputBuffers[back_buffer][2].bits[y - DISPLAY_ROWS][x].port_e & ~0x08;
+        uint8_t h2 = m_outputBuffers[back_buffer][2].bits[y - DISPLAY_ROWS][x].port_h & ~0x18;
+
+        if (color & 0x0001) e0 |= 0x08;
+        if (color & 0x0002) e1 |= 0x08;
+        if (color & 0x0004) e2 |= 0x08;
+
+        if (color & 0x0008) h0 |= 0x08;
+        if (color & 0x0010) h1 |= 0x08;
+        if (color & 0x0020) h2 |= 0x08;
+
+        if (color & 0x0040) h0 |= 0x10;
+        if (color & 0x0080) h1 |= 0x10;
+        if (color & 0x0100) h2 |= 0x10;
+        
+        m_outputBuffers[back_buffer][0].bits[y - DISPLAY_ROWS][x].port_e = e0;
+        m_outputBuffers[back_buffer][0].bits[y - DISPLAY_ROWS][x].port_h = h0;
+        m_outputBuffers[back_buffer][1].bits[y - DISPLAY_ROWS][x].port_e = e1;
+        m_outputBuffers[back_buffer][1].bits[y - DISPLAY_ROWS][x].port_h = h1;
+        m_outputBuffers[back_buffer][2].bits[y - DISPLAY_ROWS][x].port_e = e2;
+        m_outputBuffers[back_buffer][2].bits[y - DISPLAY_ROWS][x].port_h = h2;
+    }
 }
 
-void Matrix::fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t color)
+void Matrix::fillScreen(uint16_t color)
 {
-    Measure measure(m_MaxDrawTimeMicros);
+    //Measure measure(m_MaxDrawTimeMicros);
+
+    for (uint8_t r = 0; r < HEIGHT; ++r)
+        for (uint8_t c = 0; c < WIDTH; ++c)
+            _setPixel(c, r, color);
+}
+
+void Matrix::fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint16_t color)
+{
+    //Measure measure(m_MaxDrawTimeMicros);
 
     if ((x >= WIDTH)
         || (y >= HEIGHT)
@@ -209,116 +280,28 @@ void Matrix::fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8
 
     for (uint8_t r = 0; r < height; ++r)
     {
-        memset(m_Bitmap[y + r] + x, color, width);
+        for (uint8_t c = 0; c < width; ++c)
+        {
+            _setPixel(x + c, y + r, color);
+        }
     }
 }
 
 void Matrix::swapBuffers()
 {
-    Measure measure(m_MaxCalcTimeMicros);
+    //Measure measure(m_MaxCalcTimeMicros);
 
-    // This function takes bitmap data in the m_Bitmap back
-    // buffer, transforms it into the correct port bit data
-    // in the back output buffer, and then swaps the
-    // output buffers to display.
-
-    // Work out which buffer we're writing to
-
-    uint8_t back_buffer = (m_DisplayIndex + 1) & 1;
-
-    // Calculate the pixel data to write out:
-    // 1) Each row display actually contains data for
-    //    two physical rows on the screen
-    // 2) Pin assignments are:
-    //      R1  PE4    R2 PE3
-    //      G1  PE5    G2 PH3
-    //      B1  PG5    B2 PH4
-    // 
-
-    for (uint8_t row = 0; row < DISPLAY_ROWS; ++row)
-    {
-        for (uint8_t column = 0; column < WIDTH; ++column)
-        {
-            uint8_t e1 = 0;
-            uint8_t g1 = 0;
-            uint8_t h1 = 0;
-            uint8_t e2 = 0;
-            uint8_t g2 = 0;
-            uint8_t h2 = 0;
-
-            uint8_t color = PaletteColorToBits(m_Bitmap[row][column]);
-
-            if (color & 0x01) e1 |= 0x10;
-            if (color & 0x02) e2 |= 0x10;
-
-            if (color & 0x04) e1 |= 0x20;
-            if (color & 0x08) e2 |= 0x20;
-
-            if (color & 0x10) g1 |= 0x20;
-            if (color & 0x20) g2 |= 0x20;
-
-            color = PaletteColorToBits(m_Bitmap[row + DISPLAY_ROWS][column]);
-
-            if (color & 0x01) e1 |= 0x08;
-            if (color & 0x02) e2 |= 0x08;
-
-            if (color & 0x04) h1 |= 0x08;
-            if (color & 0x08) h2 |= 0x08;
-
-            if (color & 0x10) h1 |= 0x10;
-            if (color & 0x20) h2 |= 0x10;
-
-            m_outputBuffers[back_buffer][0].bits[row][column].port_e = e1;
-            m_outputBuffers[back_buffer][0].bits[row][column].port_g = g1;
-            m_outputBuffers[back_buffer][0].bits[row][column].port_h = h1;
-            m_outputBuffers[back_buffer][1].bits[row][column].port_e = e2;
-            m_outputBuffers[back_buffer][1].bits[row][column].port_g = g2;
-            m_outputBuffers[back_buffer][1].bits[row][column].port_h = h2;
-        }
-    }
-
-    // Finally, swap the display bufers
-
-    m_DisplayIndex = back_buffer;
-}
-
-uint8_t Matrix::PaletteColorToBits(uint8_t color)
-{
-    // Takes a palette entry which is three-levels for
-    // each of red, green and blue - i.e. 0..26.
+    // The function _setPixel has already formatted
+    // all of the data in the correct format for writing
+    // to the display panel - we just need to
+    // update the display index to cause the ISR
+    // to write data from the next bitmap.
     //
-    // Returns a bitmap
-    // 0x01 = red   dither 0
-    // 0x02 = red   dither 1
-    // 0x04 = green dither 0
-    // 0x08 = green dither 1
-    // 0x10 = blue  dither 0
-    // 0x20 = blue  dither 1
+    // Also, we should reset the back-buffer to black
+    // for the next frame to be written to it.
 
-    if (color > 26)
-        color = 0;
+    m_DisplayIndex ^= 1;
 
-    uint8_t red   = color % 3;
-    uint8_t green = (color / 3) % 3;
-    uint8_t blue  = color / 9;
-
-    uint8_t result = 0;
-
-    if (red == 2)
-        result |= 0x03;
-    else if (red == 1)
-        result |= 0x02;
-
-    if (green == 2)
-        result |= 0x0C;
-    else if (green == 1)
-        result |= 0x08;
-
-    if (blue == 2)
-        result |= 0x30;
-    else if (blue == 1)
-        result |= 0x20;
-
-    return result;
+    memset(m_outputBuffers[m_DisplayIndex ^ 1], 0, sizeof(m_outputBuffers[0]));
 }
 

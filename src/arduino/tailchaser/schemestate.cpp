@@ -9,6 +9,39 @@
 #include "signalstate.h"
 #include "terminal.h"
 
+static constexpr uint16_t PALETTE_SIZE = 27;
+static uint16_t PALETTE[PALETTE_SIZE] =
+{
+          // R G B
+    0000, // 0 0 0
+    0001, // 0 0 1
+    0007, // 0 0 2
+    0010, // 0 1 0
+    0011, // 0 1 1
+    0013, // 0 1 2
+    0070, // 0 2 0
+    0071, // 0 2 1
+    0077, // 0 2 2
+    0100, // 1 0 0
+    0101, // 1 0 1
+    0107, // 1 0 2
+    0110, // 1 1 0
+    0111, // 1 1 1
+    0117, // 1 1 2
+    0170, // 1 2 0
+    0171, // 1 2 1
+    0177, // 1 2 2
+    0700, // 2 0 0
+    0701, // 2 0 1
+    0707, // 2 0 2
+    0710, // 2 1 0
+    0711, // 2 1 1
+    0717, // 2 1 2
+    0770, // 2 2 0
+    0771, // 2 2 1
+    0777, // 2 2 2
+};
+
 SchemeState::SchemeState()
     : m_forceRedrawRequired(true)
     , m_memBase(nullptr)
@@ -142,21 +175,21 @@ void SchemeState::draw(Matrix &matrix)
                     uint8_t color;
                     
                     color = b1 >> 3;
-                    if (color < 27) matrix.setPixel(column + 0, row, color);
+                    if (color < PALETTE_SIZE) matrix.setPixel(column + 0, row, PALETTE[color]);
                     color = ((b1 & 0x07) << 2) | (b2 >> 6);
-                    if (color < 27) matrix.setPixel(column + 1, row, color);
+                    if (color < PALETTE_SIZE) matrix.setPixel(column + 1, row, PALETTE[color]);
                     color = (b2 >> 1) & 0x1F;
-                    if (color < 27) matrix.setPixel(column + 2, row, color);
+                    if (color < PALETTE_SIZE) matrix.setPixel(column + 2, row, PALETTE[color]);
                     color = ((b2 << 4) & 0x10) | ((b3 >> 4) & 0x0F);
-                    if (color < 27) matrix.setPixel(column + 3, row, color);
+                    if (color < PALETTE_SIZE) matrix.setPixel(column + 3, row, PALETTE[color]);
                     color = ((b3 << 1) & 0x1E) | ((b4 >> 7) & 0x01);
-                    if (color < 27) matrix.setPixel(column + 4, row, color);
+                    if (color < PALETTE_SIZE) matrix.setPixel(column + 4, row, PALETTE[color]);
                     color = (b4 >> 2) & 0x1F;
-                    if (color < 27) matrix.setPixel(column + 5, row, color);
+                    if (color < PALETTE_SIZE) matrix.setPixel(column + 5, row, PALETTE[color]);
                     color = ((b4 << 3) & 0x18) | ((b5 >> 5) & 0x07);
-                    if (color < 27) matrix.setPixel(column + 6, row, color);
+                    if (color < PALETTE_SIZE) matrix.setPixel(column + 6, row, PALETTE[color]);
                     color = b5 & 0x1F;
-                    if (color < 27) matrix.setPixel(column + 7, row, color);
+                    if (color < PALETTE_SIZE) matrix.setPixel(column + 7, row, PALETTE[color]);
                 }
             }
         }

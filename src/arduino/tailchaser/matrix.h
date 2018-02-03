@@ -28,6 +28,7 @@ public:
     static constexpr uint8_t WIDTH = 32;
     static constexpr uint8_t HEIGHT = 16;
     static constexpr uint8_t DISPLAY_ROWS = HEIGHT / 2;
+    static constexpr uint8_t DISPLAY_BITS = 3;
     
     Matrix() = default;
     ~Matrix() = default;
@@ -38,20 +39,20 @@ public:
     void showNextRow();
     void printStats(Terminal &terminal) const;
 
-    void setPixel(uint8_t x, uint8_t y, uint8_t color)
+    void setPixel(uint8_t x, uint8_t y, uint16_t color)
     {
         if ((x < WIDTH) && (y < HEIGHT))
-            m_Bitmap[y][x] = color;
+            _setPixel(x, y, color);
     }
 
-    void fillScreen(uint8_t color);
-    void fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t color);
+    void fillScreen(uint16_t color);
+    void fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint16_t color);
 
     void swapBuffers();
 
 private:
 
-    static uint8_t PaletteColorToBits(uint8_t color);
+    void _setPixel(uint8_t x, uint8_t y, uint16_t color);
 
     struct OutputBits
     {
@@ -65,25 +66,25 @@ private:
         OutputBits bits[DISPLAY_ROWS][WIDTH];
     };
 
-    struct Measure
-    {
-        Measure(int &max_ref)
-            : m_startTime(micros())
-            , m_maxRef(max_ref)
-        {
-        }
-
-        ~Measure()
-        {
-            int delay = micros() - m_startTime;
-            if (delay > m_maxRef)
-                m_maxRef = delay;
-        }
-
-    private:
-        int m_startTime;
-        int &m_maxRef;
-    };
+    //struct Measure
+    //{
+    //    Measure(int &max_ref)
+    //        : m_startTime(micros())
+    //        , m_maxRef(max_ref)
+    //    {
+    //    }
+    //
+    //    ~Measure()
+    //    {
+    //        int delay = micros() - m_startTime;
+    //        if (delay > m_maxRef)
+    //            m_maxRef = delay;
+    //    }
+    //
+    //private:
+    //    int m_startTime;
+    //    int &m_maxRef;
+    //};
 
     friend void TIMER1_OVF_vect();
 
@@ -96,9 +97,7 @@ private:
     int m_MaxDrawTimeMicros;
     int m_MaxCalcTimeMicros;
 
-    uint8_t m_Bitmap[HEIGHT][WIDTH];
-
-    OutputBuffer m_outputBuffers[2][2];
+    OutputBuffer m_outputBuffers[2][DISPLAY_BITS];
 };
 
 #endif // __MATRIX_H__
