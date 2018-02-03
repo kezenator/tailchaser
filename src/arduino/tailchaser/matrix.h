@@ -16,6 +16,7 @@
 
 // Forward definitions
 class Terminal;
+extern "C" void TIMER1_OVF_vect(void) __attribute__ ((signal));
 
 /**
  * A class that manages the 16x32 RGB LED matrix panel.
@@ -26,6 +27,7 @@ public:
 
     static constexpr uint8_t WIDTH = 32;
     static constexpr uint8_t HEIGHT = 16;
+    static constexpr uint8_t DISPLAY_ROWS = HEIGHT / 2;
     
     Matrix() = default;
     ~Matrix() = default;
@@ -42,8 +44,6 @@ public:
     void swapBuffers();
 
 private:
-
-    static constexpr uint8_t DISPLAY_ROWS = HEIGHT / 2;
 
     static uint8_t PaletteColorToBits(uint8_t color);
 
@@ -78,6 +78,10 @@ private:
         int m_startTime;
         int &m_maxRef;
     };
+
+    friend void TIMER1_OVF_vect();
+
+    static Matrix *g_activeMatrix;
 
     uint8_t m_DisplayIndex;
     uint8_t m_RowIndex;

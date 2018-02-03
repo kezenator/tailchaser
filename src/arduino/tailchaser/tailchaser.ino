@@ -53,12 +53,12 @@ void loop()
                 }
                 else if ((c == 7) && (r < 3))
                 {
-                    color = 9 * r;
+                    color = r;
                 }
                 else if ((r == 3) && (c < 6))
                 {
                     if (c < 3)
-                        color = c;
+                        color = 9 * c;
                     else
                         color = (3 * (c - 3));
                 }
@@ -74,5 +74,5 @@ void loop()
     }
     
     menu.processInput();
-    matrix.showNextRow();
+    //matrix.showNextRow();
 }

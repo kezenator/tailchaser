@@ -21,6 +21,35 @@
 #define MATRIX_PIN_LAT A3
 #define MATRIX_PIN_OE  9
 
+Matrix *Matrix::g_activeMatrix = nullptr;
+
+// Defined the overall refresh-rate (in Hz),
+// plus the fraction of time the dithered pixels are off (numerator/denum)
+// plus the timer pre-scaler
+
+static constexpr uint16_t REFRESH_RATE = 80 * Matrix::DISPLAY_ROWS;
+static constexpr uint16_t OFF_NUMERATOR = 1;
+static constexpr uint16_t OFF_DENOM = 12;
+static constexpr uint16_t TIMER_PRESCALER = 8;
+
+// Calculate the number of timer counts for the on and off times
+
+static constexpr uint16_t OFF_COUNT = uint16_t(16000000ULL / TIMER_PRESCALER * (OFF_DENOM - OFF_NUMERATOR) / OFF_DENOM / REFRESH_RATE);
+static constexpr uint16_t ON_COUNT = uint16_t(16000000ULL / TIMER_PRESCALER * OFF_NUMERATOR / OFF_DENOM / REFRESH_RATE);
+
+// Check that we've got enough time to run the ISR
+// NOTE - the duration is an empirically determined from testing....
+
+static constexpr uint16_t ISR_DURATION_CLKS = 2000;
+
+static_assert(uint32_t(ISR_DURATION_CLKS) <= (uint32_t(OFF_COUNT) * uint32_t(TIMER_PRESCALER)), "Off time is too short");
+static_assert(uint32_t(ISR_DURATION_CLKS) <= (uint32_t(ON_COUNT) * uint32_t(TIMER_PRESCALER)), "On time is too short");
+
+// Timer works in increment until overflow mode - subtract from 16-bit max.
+
+static constexpr uint16_t OFF_TIMER_INIT = uint16_t(65536UL - OFF_COUNT);
+static constexpr uint16_t ON_TIMER_INIT = uint16_t(65536UL - ON_COUNT);
+
 void Matrix::init()
 {
     auto init_pin = [](int pin)
@@ -53,6 +82,27 @@ void Matrix::init()
 
     fillScreen(1);
     swapBuffers();
+
+    g_activeMatrix = this;
+
+    noInterrupts();           // disable all interrupts
+    TCCR1A = 0;
+    TCCR1B = 0;
+
+    TCNT1 = ON_TIMER_INIT;
+    TCCR1B |= (1 << CS11);    // /8 prescaler 
+    TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
+    interrupts();             // enable all interrupts
+}
+
+ISR(TIMER1_OVF_vect)        
+{
+    if (Matrix::g_activeMatrix->m_DitherIndex == 0)
+        TCNT1 = OFF_TIMER_INIT;
+    else
+        TCNT1 = ON_TIMER_INIT;
+    
+    Matrix::g_activeMatrix->showNextRow();
 }
 
 void Matrix::showNextRow()
