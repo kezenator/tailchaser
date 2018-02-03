@@ -111,6 +111,7 @@ namespace Com.TailChaser.Editor.UI
 
                     m_Scheme = new_scheme;
                     m_SchemeView.Scheme = new_scheme;
+                    m_SimulatorView.Scheme = new_scheme;
 
                     m_UndoRedoBuffer.Clear();
                     UpdateTitleBar();
