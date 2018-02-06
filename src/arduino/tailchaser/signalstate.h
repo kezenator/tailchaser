@@ -33,11 +33,17 @@ public:
         return (m_value & layer_mask) == layer_value;
     }
 
-    void update();
+    bool isSet(uint8_t mask) const
+    {
+        return (m_value & mask) != 0;
+    }
+
+    bool update();
     void toggle(uint8_t mask);
 
 private:
     uint8_t m_value;
+    uint8_t m_lastReportedValue;
     int m_indicatorMillis;
 };
 

@@ -28,7 +28,11 @@ void setup()
 void loop()
 {
     menu.processInput();
-    signal_state.update();
+
+    if (signal_state.update())
+    {
+        menu.sendStatus();
+    }
 
     if (cur_scheme.update(signal_state))
     {

@@ -8,7 +8,7 @@
 #define __SCHEME_LIBRARY_H__
 
 #include <stdint.h>
-#include <string.h>
+#include <stddef.h>
 
 // Forward declarations
 class SchemeState;

@@ -9,10 +9,11 @@
 
 SignalState::SignalState()
     : m_value(0)
+    , m_lastReportedValue(0xFF)
 {
 }
 
-void SignalState::update()
+bool SignalState::update()
 {
     if (m_value & SIGNAL_INDICATOR_SOLID)
     {
@@ -24,6 +25,13 @@ void SignalState::update()
             m_indicatorMillis += 500;
         }
     }
+
+    if (m_lastReportedValue != m_value)
+    {
+        m_lastReportedValue = m_value;
+        return true;
+    }
+    return false;
 }
 
 void SignalState::toggle(uint8_t mask)

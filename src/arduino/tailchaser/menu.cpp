@@ -14,52 +14,122 @@ Menu::Menu(Stream &stream, Matrix &matrix, SchemeState &scheme_state, SignalStat
     , m_matrix(matrix)
     , m_schemeState(scheme_state)
     , m_signalState(signal_state)
+    , m_state(LINE_DATA)
+    , m_length(0)
 {
+}
+
+void Menu::sendStatus()
+{
+    print("S");
+    if (m_signalState.isSet(SignalState::SIGNAL_TAIL))
+        print("T");
+    if (m_signalState.isSet(SignalState::SIGNAL_BRAKE))
+        print("B");
+    if (m_signalState.isSet(SignalState::SIGNAL_REVERSE))
+        print("R");
+    if (m_signalState.isSet(SignalState::SIGNAL_INDICATOR_SOLID))
+        print("I");
+    if (m_signalState.isSet(SignalState::SIGNAL_INDICATOR_FLASH))
+        print("F");
+    newLine();
 }
 
 void Menu::handleKey(int key)
 {
-    print("key=");
-    printInt(key);
-    newLine();
+    switch (m_state)
+    {
+    case LINE_DATA:
+        if (key == '\r')
+        {
+            m_buffer[m_length] = 0;
+            m_state = GOT_CR;
+        }
+        else if (key == '\n')
+        {
+            m_buffer[m_length] = 0;
 
-    if (key == '?')
-    {
-        println("? - Print help");
-        println("p - print statistics");
-        println("a - toggle tail");
-        println("s - toggle brake");
-        println("d - toggle reverse");
-        println("f - toggle indicator");
+            processLine();
+
+            m_length = 0;
+        }
+        else
+        {
+            m_buffer[m_length] = key;
+            m_length += 1;
+    
+            if (m_length >= BUFFER_LENGTH)
+            {
+                m_state = ERROR_WAIT_FOR_NL;
+            }
+        }
+        break;
+
+    case ERROR_WAIT_FOR_NL:
+        if (key == '\n')
+        {
+            m_length = 0;
+            m_state = LINE_DATA;
+        }
+        break;
+
+    case GOT_CR:
+        if (key == '\n')
+        {
+            m_buffer[m_length] = 0;
+            processLine();
+
+            m_length = 0;
+            m_state = LINE_DATA;
+        }
+        else
+        {
+            m_state = ERROR_WAIT_FOR_NL;
+        }
+        break;
     }
-    else if (key == 'p')
-    {    
-        m_matrix.printStats(*this);
-        m_schemeState.printState(*this);
-    }
-    else if (key == 'a')
+}
+
+void Menu::processLine()
+{
+    bool send_state = false;
+    
+    if ((m_length == 1)
+        && (m_buffer[0] == 'H'))
     {
-        m_signalState.toggle(SignalState::SIGNAL_TAIL);
-        println("Toggled TAIL");
+        // Heartbeat
+        send_state = true;
     }
-    else if (key == 's')
+    else if ((m_length == 2)
+        && (m_buffer[0] == 'T'))
     {
-        m_signalState.toggle(SignalState::SIGNAL_BRAKE);
-        println("Toggled BRAKE");
+        // Toggle
+
+        if (m_buffer[1] == 'T')
+        {
+            m_signalState.toggle(SignalState::SIGNAL_TAIL);
+            send_state = true;
+        }
+        else if (m_buffer[1] == 'B')
+        {
+            m_signalState.toggle(SignalState::SIGNAL_BRAKE);
+            send_state = true;
+        }
+        else if (m_buffer[1] == 'R')
+        {
+            m_signalState.toggle(SignalState::SIGNAL_REVERSE);
+            send_state = true;
+        }
+        else if (m_buffer[1] == 'I')
+        {
+            m_signalState.toggle(SignalState::SIGNAL_INDICATOR_SOLID);
+            send_state = true;
+        }
     }
-    else if (key == 'd')
+
+    if (send_state)
     {
-        m_signalState.toggle(SignalState::SIGNAL_REVERSE);
-        println("Toggled REVERSE");
-    }
-    else if (key == 'f')
-    {
-        m_signalState.toggle(SignalState::SIGNAL_INDICATOR_SOLID);
-        println("Toggled INDICATOR");
-    }
-    else
-    {
-        println("Press '?' for help");
+        sendStatus();
     }
 }
 

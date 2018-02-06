@@ -70,29 +70,35 @@ namespace Com.TailChaser.Editor.UI
             m_MainTabs.SelectedIndex = 1;
         }
 
+        private void m_ViewDeviceMenuItem_Click(object sender, EventArgs e)
+        {
+            m_MainTabs.SelectedIndex = 2;
+        }
+
         private void m_SimulateTailMenuItem_Click(object sender, EventArgs e)
         {
-            ToggleSimulate(m_SimulateTailMenuItem, Model.SignalMask.Tail);
+            Toggle(Model.SignalMask.Tail);
         }
 
         private void m_SimulateBrakeMenuItem_Click(object sender, EventArgs e)
         {
-            ToggleSimulate(m_SimulateBrakeMenuItem, Model.SignalMask.Brake);
+            Toggle(Model.SignalMask.Brake);
         }
 
         private void m_SimulateReverseMenuItem_Click(object sender, EventArgs e)
         {
-            ToggleSimulate(m_SimulateReverseMenuItem, Model.SignalMask.Reverse);
+            Toggle(Model.SignalMask.Reverse);
         }
 
         private void m_SimulateIndicatorMenuItem_Click(object sender, EventArgs e)
         {
-            ToggleSimulate(m_SimulateIndicatorMenuItem, Model.SignalMask.IndicatorSolid);
+            Toggle(Model.SignalMask.IndicatorSolid);
         }
 
-        private void ToggleSimulate(ToolStripMenuItem menu_item, Model.SignalMask signal_mask)
+        private void Toggle(Model.SignalMask signal_mask)
         {
             m_SimulatorView.ToggleSignal(signal_mask);
+            m_DeviceView.ToggleSignal(signal_mask);
         }
 
         private void m_FileOpenMenuItem_Click(object sender, EventArgs e)
