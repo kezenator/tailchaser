@@ -28,7 +28,9 @@ public:
 
     SchemeState();
 
-    bool loadScheme(const uint8_t *data, size_t length);
+    void clearScheme();
+    bool loadSchemeFromRam(const uint8_t *data, size_t max_length);
+
     bool update(const SignalState &signal_state);
     void draw(Matrix &matrix);
 

@@ -31,6 +31,23 @@ namespace Com.TailChaser.Editor.Model.Serialize
             }
         }
 
+        public byte[] Bytes
+        {
+            get
+            {
+                byte[] result = new byte[m_TotalBytes];
+
+                int index = 0;
+                foreach (KeyValuePair<byte[], string> entry in m_Lines)
+                {
+                    System.Array.Copy(entry.Key, 0, result, index, entry.Key.Length);
+                    index += entry.Key.Length;
+                }
+
+                return result;
+            }
+        }
+
         public void CommitLine(string comment)
         {
             m_TotalBytes += m_CurLine.Count;

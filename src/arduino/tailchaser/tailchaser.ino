@@ -12,17 +12,17 @@
 #include "terminal.h"
 
 Matrix matrix;
-SchemeLibrary library;
 SchemeState cur_scheme;
+SchemeLibrary library(cur_scheme);
 SignalState signal_state;
-Menu menu(Serial, matrix, cur_scheme, signal_state);
+Menu menu(Serial, matrix, cur_scheme, library, signal_state);
 
 void setup()
 {
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
     matrix.init();
-    library.loadDefaultScheme(cur_scheme);
+    library.loadDefaultScheme();
 }
 
 void loop()

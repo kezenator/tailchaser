@@ -13,28 +13,7 @@ namespace Com.TailChaser.Editor.Model.Serialize
         {
             TextSerializer s = new TextSerializer();
 
-            BinarySerializer bs = new BinarySerializer();
-
-            {
-                bs.WriteLengthAndUtf8String(scheme.Name, "Invalid scheme name");
-                bs.CommitLineFormat("Name: \"{0}\"", scheme.Name);
-                bs.WriteLengthAndUtf8String(scheme.Description, "Invalid scheme description");
-                bs.CommitLineFormat("Description: \"{0}\"", scheme.Description);
-
-                bs.WriteIntAsUint8(scheme.NumLayers, "Scheme has too many layers");
-                bs.CommitLineFormat("{0} Layer(s)", scheme.NumLayers);
-
-                foreach (Layer l in scheme.Layers)
-                {
-                    bs.WriteLengthAndUtf8String(l.Name, "Invalid layer name");
-                    bs.CommitLineFormat("Layer \"{0}\"", l.Name);
-
-                    bs.WriteBytes(new byte[] { l.SignalSet.GetMaskAsByte(), l.SignalSet.GetValueAsByte() });
-                    bs.CommitLine(l.SignalSet.ToString());
-
-                    WriteBitmap(l.Bitmap, bs);
-                }
-            }
+            BinarySerializer bs = InternalSerializeBinary(scheme);
 
             s.AddMultilineDeoxygenComment(new string[] {
                 "@file",
@@ -56,6 +35,37 @@ namespace Com.TailChaser.Editor.Model.Serialize
             s.AddLine("#endif // __SCHEME__" + scheme.Name + "_H__");
 
             return s.ToString();
+        }
+
+        public static byte[] SerializeBinary(Scheme scheme)
+        {
+            return InternalSerializeBinary(scheme).Bytes;
+        }
+
+        private static BinarySerializer InternalSerializeBinary(Scheme scheme)
+        {
+            BinarySerializer bs = new BinarySerializer();
+
+            bs.WriteLengthAndUtf8String(scheme.Name, "Invalid scheme name");
+            bs.CommitLineFormat("Name: \"{0}\"", scheme.Name);
+            bs.WriteLengthAndUtf8String(scheme.Description, "Invalid scheme description");
+            bs.CommitLineFormat("Description: \"{0}\"", scheme.Description);
+
+            bs.WriteIntAsUint8(scheme.NumLayers, "Scheme has too many layers");
+            bs.CommitLineFormat("{0} Layer(s)", scheme.NumLayers);
+
+            foreach (Layer l in scheme.Layers)
+            {
+                bs.WriteLengthAndUtf8String(l.Name, "Invalid layer name");
+                bs.CommitLineFormat("Layer \"{0}\"", l.Name);
+
+                bs.WriteBytes(new byte[] { l.SignalSet.GetMaskAsByte(), l.SignalSet.GetValueAsByte() });
+                bs.CommitLine(l.SignalSet.ToString());
+
+                WriteBitmap(l.Bitmap, bs);
+            }
+
+            return bs;
         }
 
         public static Scheme Deserialize(string contents, Palette palette)

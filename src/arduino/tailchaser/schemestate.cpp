@@ -49,15 +49,39 @@ SchemeState::SchemeState()
 {
 }
 
-bool SchemeState::loadScheme(const uint8_t *data, size_t length)
+void SchemeState::clearScheme()
+{
+    if (m_numLayers != 0)
+    {
+        m_forceRedrawRequired = true;
+        m_memBase = nullptr;
+        m_numLayers = 0;
+    }
+}
+
+bool SchemeState::loadSchemeFromRam(const uint8_t *data, size_t max_length)
 {
     // Reset to no schemes and mark that a forced
     // redraw is required
     
-    m_forceRedrawRequired = true;
-    m_memBase = nullptr;
-    m_numLayers = 0;
+    clearScheme();
 
+    // Work out the length - from the first two
+    // bytes
+
+    if (max_length < 2)
+        return false;
+
+    uint16_t length = data[0] | (data[1] << 8);
+
+    Serial.print("LENGTH=");
+    Serial.println(length);
+
+    if (max_length < (2 + length))
+        return false;
+
+    data += 2;
+    
     // Save original base
 
     const uint8_t *orig_base = data;
@@ -74,7 +98,10 @@ bool SchemeState::loadScheme(const uint8_t *data, size_t length)
     if (length < 1)
         return false;
     
-    uint8_t layers = pgm_read_byte_near(data);
+    uint8_t layers = *data;
+
+    Serial.print("LAYERS=");
+    Serial.println(layers);
 
     if (layers > MAX_LAYERS)
         return false;
@@ -93,17 +120,23 @@ bool SchemeState::loadScheme(const uint8_t *data, size_t length)
             return false;
 
         m_layers[i].m_currentlyDisplayed = false;
-        m_layers[i].m_conditionMask = pgm_read_byte_near(data);
-        m_layers[i].m_conditionValue = pgm_read_byte_near(data + 1);
+        m_layers[i].m_conditionMask = data[0];
+        m_layers[i].m_conditionValue = data[1];
         m_layers[i].m_bitmapBase = data + 2;
 
         data += (2 + BITMAP_BYTES);
         length -= (2 + BITMAP_BYTES);
+
+        Serial.print("READ ");
+        Serial.print(i);
+        Serial.print(" LENGTH=");
+        Serial.println(length);
     }
 
     if (length != 0)
         return false;
 
+    m_forceRedrawRequired = true;
     m_memBase = orig_base;
     m_numLayers = layers;
     return true;
@@ -114,7 +147,7 @@ bool SchemeState::skipString(const uint8_t *&data, size_t &length)
     if (length < 1)
         return false;
 
-    uint8_t str_len = pgm_read_byte_near(data);
+    uint8_t str_len = data[0];
 
     if (length <= str_len)
         return false;
@@ -148,8 +181,6 @@ void SchemeState::draw(Matrix &matrix)
     static_assert((BITMAP_BYTES * 8 / 5) == (Matrix::WIDTH * Matrix::HEIGHT), "Matrix and Bitmap sizes don't match");
     static_assert((Matrix::WIDTH % 8) == 0, "Matrix width must be a multiple of 8");
         
-    matrix.fillScreen(0);
-
     for (uint8_t i = 0; i < m_numLayers; ++i)
     {
         if (m_layers[i].m_currentlyDisplayed)
@@ -166,11 +197,11 @@ void SchemeState::draw(Matrix &matrix)
 
                 for (uint8_t column = 0; column < Matrix::WIDTH; column += 8, data += 5)
                 {
-                    uint8_t b1 = pgm_read_byte_near(data + 0);
-                    uint8_t b2 = pgm_read_byte_near(data + 1);
-                    uint8_t b3 = pgm_read_byte_near(data + 2);
-                    uint8_t b4 = pgm_read_byte_near(data + 3);
-                    uint8_t b5 = pgm_read_byte_near(data + 4);
+                    uint8_t b1 = data[0];
+                    uint8_t b2 = data[1];
+                    uint8_t b3 = data[2];
+                    uint8_t b4 = data[3];
+                    uint8_t b5 = data[4];
 
                     uint8_t color;
                     

@@ -11,6 +11,7 @@
 
 // Forward definitions
 class Matrix;
+class SchemeLibrary;
 class SchemeState;
 class SignalState;
 
@@ -20,7 +21,7 @@ class SignalState;
 class Menu: public Terminal
 {
 public:
-    Menu(Stream &stream, Matrix &matrix, SchemeState &scheme_state, SignalState &signal_state);
+    Menu(Stream &stream, Matrix &matrix, SchemeState &scheme_state, SchemeLibrary &scheme_lib, SignalState &signal_state);
     void sendStatus();
     void handleKey(int key) override;
 
@@ -30,6 +31,7 @@ private:
 
     Matrix &m_matrix;
     SchemeState &m_schemeState;
+    SchemeLibrary &m_schemeLib;
     SignalState &m_signalState;
 
     enum States
@@ -39,7 +41,7 @@ private:
         GOT_CR,
     };
 
-    static constexpr size_t BUFFER_LENGTH = 100;
+    static constexpr size_t BUFFER_LENGTH = 520;
     
     States m_state;
     size_t m_length;

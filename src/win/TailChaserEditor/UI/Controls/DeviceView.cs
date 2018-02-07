@@ -20,6 +20,7 @@ namespace Com.TailChaser.Editor.UI.Controls
 
             m_FoundDevice = "";
             m_RecievedData = "";
+            m_Upload = null;
 
             PerformDisconnect();
         }
@@ -48,14 +49,37 @@ namespace Com.TailChaser.Editor.UI.Controls
             if (m_Connected
                 && !tx_str.Equals(""))
             {
-                try
-                {
-                    m_SerialPort.Write(tx_str + "\r\n");
-                }
-                catch (Exception)
-                {
-                    PerformDisconnect();
-                }
+                WriteLine(tx_str);
+            }
+        }
+
+        public void Upload(byte [] data)
+        {
+            if (m_Upload != null)
+            {
+                MessageBox.Show("Download already in progress", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else if (!m_Connected)
+            {
+                MessageBox.Show("Please connect device first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else if (data.Length > (FLASH_PAGE_SIZE * NUM_FLASH_PAGES - 2))
+            {
+                MessageBox.Show(
+                    string.Format("Too large - generated {0}, maximum supported is {1}", data.Length, FLASH_PAGE_SIZE * NUM_FLASH_PAGES),
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            else
+            {
+                m_Upload = new byte[data.Length + 2];
+                m_Upload[0] = (byte)(data.Length);
+                m_Upload[1] = (byte)(data.Length >> 8);
+                System.Array.Copy(data, 0, m_Upload, 2, data.Length);
+                m_UploadIndex = 0;
+
+                UploadNextPage();
             }
         }
 
@@ -101,6 +125,8 @@ namespace Com.TailChaser.Editor.UI.Controls
                     catch (Exception)
                     {
                         PerformDisconnect();
+
+                        m_StatusTextBox.Text = "Couldn't connect to " + new_device;
                     }
                 }
             }
@@ -140,6 +166,15 @@ namespace Com.TailChaser.Editor.UI.Controls
             // Ensure port is closed
 
             m_SerialPort.Close();
+
+            // Display error dialog
+
+            if (m_Upload != null)
+            {
+                m_Upload = null;
+
+                MessageBox.Show("Could not upload - device disconnected", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void HandleSerialRecieve(object sender, SerialDataReceivedEventArgs e)
@@ -258,15 +293,38 @@ namespace Com.TailChaser.Editor.UI.Controls
                     m_IndicatorLabel.BackColor = Color.Black;
                 }
             }
-        }
+            else if (line.Equals("W")
+                && (m_Upload != null))
+            {
+                m_UploadIndex += FLASH_PAGE_SIZE;
 
+                if (m_UploadIndex >= m_Upload.Length)
+                {
+                    m_Upload = null;
+
+                    try
+                    {
+                        WriteLine("L");
+                    }
+                    catch (Exception)
+                    {
+                        PerformDisconnect();
+                    }
+                }
+                else
+                {
+                    UploadNextPage();
+                }
+            }
+        }
+        
         private void m_HeartbeatTimer_Tick(object sender, EventArgs e)
         {
             m_HeartbeatTimer.Interval = 1000;
 
             try
             {
-                m_SerialPort.Write("H\r\n");
+                WriteLine("H");
             }
             catch (Exception)
             {
@@ -317,12 +375,51 @@ namespace Com.TailChaser.Editor.UI.Controls
             ToggleSignal(Model.SignalMask.IndicatorSolid);
         }
 
+        private void WriteLine(string tx_str)
+        {
+            try
+            {
+                listBox1.Items.Add("Write: " + tx_str);
+                m_SerialPort.Write(tx_str + "\r\n");
+            }
+            catch (Exception)
+            {
+                PerformDisconnect();
+            }
+        }
+
+        private void UploadNextPage()
+        {
+            byte[] page = new byte[FLASH_PAGE_SIZE];
+
+            int to_write = m_Upload.Length - m_UploadIndex;
+            if (to_write > FLASH_PAGE_SIZE)
+                to_write = FLASH_PAGE_SIZE;
+
+            System.Array.Copy(m_Upload, m_UploadIndex, page, 0, to_write);
+
+            for (int i = to_write; i < FLASH_PAGE_SIZE; ++i)
+                page[i] = 0;
+
+            string write = string.Format("W{0:X2}:", m_UploadIndex / FLASH_PAGE_SIZE);
+            for (int i = 0; i < FLASH_PAGE_SIZE; ++i)
+                write += string.Format("{0:X2}", page[i]);
+
+            WriteLine(write);
+        }
+
         private static int HEARTBEATS_UNTIL_DISCOVERY_FAILED = 5;
         private static int HEARTBEATS_UNTIL_DISCONNECT = 4;
+
+        private static int FLASH_PAGE_SIZE = 256;
+        private static int NUM_FLASH_PAGES = 6;
 
         private string m_FoundDevice;
         private bool m_Connected;
         private int m_HeartbeatsSinceResponse;
         private string m_RecievedData;
+
+        private byte[] m_Upload;
+        private int m_UploadIndex;
     }
 }

@@ -34,6 +34,12 @@ namespace Com.TailChaser.Editor.UI
             Application.Exit();
         }
 
+        private void m_FileUploadMenuItem_Click(object sender, EventArgs e)
+        {
+            m_MainTabs.SelectedIndex = 2;
+            m_DeviceView.Upload(Model.Serialize.CCodeFileFormat.SerializeBinary(m_Scheme));
+        }
+
         private void m_EditUndoMenuItem_Click(object sender, EventArgs e)
         {
             m_UndoRedoBuffer.Undo();

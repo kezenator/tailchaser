@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
             Com.TailChaser.Editor.Model.Palette palette1 = new Com.TailChaser.Editor.Model.Palette();
+            System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
             this.m_MenuStrip = new System.Windows.Forms.MenuStrip();
             this.m_FileMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.m_FileOpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,7 +63,9 @@
             this.m_DeviceView = new Com.TailChaser.Editor.UI.Controls.DeviceView();
             this.m_SaveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.m_OpenFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.m_FileUploadMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.m_MenuStrip.SuspendLayout();
             this.m_MainTabs.SuspendLayout();
             this.m_EditTab.SuspendLayout();
@@ -73,7 +76,7 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(118, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // m_MenuStrip
             // 
@@ -95,6 +98,8 @@
             this.m_FileSaveMenuItem,
             this.m_FileSaveAsMenuItem,
             toolStripSeparator1,
+            this.m_FileUploadMenuItem,
+            toolStripSeparator2,
             this.m_FileExitMenuItem});
             this.m_FileMenu.Name = "m_FileMenu";
             this.m_FileMenu.Size = new System.Drawing.Size(37, 20);
@@ -103,28 +108,28 @@
             // m_FileOpenMenuItem
             // 
             this.m_FileOpenMenuItem.Name = "m_FileOpenMenuItem";
-            this.m_FileOpenMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.m_FileOpenMenuItem.Size = new System.Drawing.Size(152, 22);
             this.m_FileOpenMenuItem.Text = "&Open...";
             this.m_FileOpenMenuItem.Click += new System.EventHandler(this.m_FileOpenMenuItem_Click);
             // 
             // m_FileSaveMenuItem
             // 
             this.m_FileSaveMenuItem.Name = "m_FileSaveMenuItem";
-            this.m_FileSaveMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.m_FileSaveMenuItem.Size = new System.Drawing.Size(152, 22);
             this.m_FileSaveMenuItem.Text = "&Save";
             this.m_FileSaveMenuItem.Click += new System.EventHandler(this.m_FileSaveMenuItem_Click);
             // 
             // m_FileSaveAsMenuItem
             // 
             this.m_FileSaveAsMenuItem.Name = "m_FileSaveAsMenuItem";
-            this.m_FileSaveAsMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.m_FileSaveAsMenuItem.Size = new System.Drawing.Size(152, 22);
             this.m_FileSaveAsMenuItem.Text = "Save &as...";
             this.m_FileSaveAsMenuItem.Click += new System.EventHandler(this.m_FileSaveAsMenuItem_Click);
             // 
             // m_FileExitMenuItem
             // 
             this.m_FileExitMenuItem.Name = "m_FileExitMenuItem";
-            this.m_FileExitMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.m_FileExitMenuItem.Size = new System.Drawing.Size(152, 22);
             this.m_FileExitMenuItem.Text = "E&xit";
             this.m_FileExitMenuItem.Click += new System.EventHandler(this.m_FileExitMenuItem_Click);
             // 
@@ -167,7 +172,7 @@
             // 
             this.m_ViewEditMenuItem.Name = "m_ViewEditMenuItem";
             this.m_ViewEditMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.m_ViewEditMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_ViewEditMenuItem.Size = new System.Drawing.Size(139, 22);
             this.m_ViewEditMenuItem.Text = "&Edit";
             this.m_ViewEditMenuItem.Click += new System.EventHandler(this.m_ViewEditMenuItem_Click);
             // 
@@ -175,7 +180,7 @@
             // 
             this.m_ViewSimulateMenuItem.Name = "m_ViewSimulateMenuItem";
             this.m_ViewSimulateMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
-            this.m_ViewSimulateMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_ViewSimulateMenuItem.Size = new System.Drawing.Size(139, 22);
             this.m_ViewSimulateMenuItem.Text = "&Simulate";
             this.m_ViewSimulateMenuItem.Click += new System.EventHandler(this.m_ViewSimulateMenuItem_Click);
             // 
@@ -183,7 +188,7 @@
             // 
             this.m_ViewDeviceMenuItem.Name = "m_ViewDeviceMenuItem";
             this.m_ViewDeviceMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.m_ViewDeviceMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_ViewDeviceMenuItem.Size = new System.Drawing.Size(139, 22);
             this.m_ViewDeviceMenuItem.Text = "&Device";
             this.m_ViewDeviceMenuItem.Click += new System.EventHandler(this.m_ViewDeviceMenuItem_Click);
             // 
@@ -352,6 +357,7 @@
             // m_DeviceView
             // 
             this.m_DeviceView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.m_DeviceView.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_DeviceView.Location = new System.Drawing.Point(0, 0);
             this.m_DeviceView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_DeviceView.Name = "m_DeviceView";
@@ -368,6 +374,18 @@
             this.m_OpenFileDialog.DefaultExt = "h";
             this.m_OpenFileDialog.FileName = "openFileDialog1";
             this.m_OpenFileDialog.Filter = "C/C++ Header Files|*.h|All Files|*.*";
+            // 
+            // m_FileUploadMenuItem
+            // 
+            this.m_FileUploadMenuItem.Name = "m_FileUploadMenuItem";
+            this.m_FileUploadMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileUploadMenuItem.Text = "&Upload";
+            this.m_FileUploadMenuItem.Click += new System.EventHandler(this.m_FileUploadMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // MainForm
             // 
@@ -424,5 +442,6 @@
         private System.Windows.Forms.ToolStripMenuItem m_ViewDeviceMenuItem;
         private System.Windows.Forms.TabPage m_DevicePage;
         private Controls.DeviceView m_DeviceView;
+        private System.Windows.Forms.ToolStripMenuItem m_FileUploadMenuItem;
     }
 }

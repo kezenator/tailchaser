@@ -6,13 +6,15 @@
 
 #include "matrix.h"
 #include "menu.h"
+#include "schemelib.h"
 #include "schemestate.h"
 #include "signalstate.h"
 
-Menu::Menu(Stream &stream, Matrix &matrix, SchemeState &scheme_state, SignalState &signal_state)
+Menu::Menu(Stream &stream, Matrix &matrix, SchemeState &scheme_state, SchemeLibrary &scheme_lib, SignalState &signal_state)
     : Terminal(stream)
     , m_matrix(matrix)
     , m_schemeState(scheme_state)
+    , m_schemeLib(scheme_lib)
     , m_signalState(signal_state)
     , m_state(LINE_DATA)
     , m_length(0)
@@ -125,6 +127,45 @@ void Menu::processLine()
             m_signalState.toggle(SignalState::SIGNAL_INDICATOR_SOLID);
             send_state = true;
         }
+    }
+    else if ((m_length == (4 + 2 * SchemeLibrary::FLASH_PAGE_SIZE))
+        && (m_buffer[0] == 'W')
+        && (m_buffer[3] == ':'))
+    {
+        auto fh_n = [](char ch) -> uint8_t
+        {
+            if ((ch >= '0') && (ch <= '9'))
+                return ch - '0';
+            if ((ch >= 'A') && (ch <= 'F'))
+                return ch - 'A' + 10;
+            if ((ch >= 'a') && (ch <= 'f'))
+                return ch - 'a' + 10;
+            return 0;
+        };
+
+        auto fh_b = [&fh_n](char ch1, char ch2) -> uint8_t
+        {
+            return (fh_n(ch1) << 4) | fh_n(ch2);
+        };
+        
+        byte page_num = fh_b(m_buffer[1], m_buffer[2]);
+
+        if (page_num < SchemeLibrary::NUM_FLASH_PAGES)
+        {
+            for (int i = 0; i < SchemeLibrary::FLASH_PAGE_SIZE; ++i)
+                m_buffer[i] = fh_b(m_buffer[4 + 2 * i], m_buffer[5 + 2 * i]);
+    
+            m_schemeLib.writeFlashPage(page_num, m_buffer);
+
+            print("W");
+            newLine();
+        }
+    }
+    else if ((m_length == 1)
+        && (m_buffer[0] == 'L'))
+    {
+        m_schemeLib.loadSchemeFromFlash();
+        send_state = true;
     }
 
     if (send_state)

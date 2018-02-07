@@ -63,17 +63,23 @@
             this.m_DiscoveryTimer.Interval = 2000;
             this.m_DiscoveryTimer.Tick += new System.EventHandler(this.m_DiscoveryTimer_Tick);
             // 
+            // m_SerialPort
+            // 
+            this.m_SerialPort.ReadTimeout = 500;
+            this.m_SerialPort.WriteTimeout = 500;
+            // 
             // listBox1
             // 
             this.listBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.listBox1.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 17;
+            this.listBox1.ItemHeight = 18;
             this.listBox1.Location = new System.Drawing.Point(3, 178);
             this.listBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(625, 429);
+            this.listBox1.Size = new System.Drawing.Size(625, 418);
             this.listBox1.TabIndex = 0;
             // 
             // m_HeartbeatTimer
