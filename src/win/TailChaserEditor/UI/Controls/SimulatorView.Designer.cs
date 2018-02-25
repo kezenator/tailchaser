@@ -57,6 +57,7 @@
             this.m_BitmapView.Size = new System.Drawing.Size(1001, 483);
             this.m_BitmapView.TabIndex = 0;
             this.m_BitmapView.UndoRedoBuffer = null;
+            this.m_BitmapView.BeforePaint += new System.Windows.Forms.PaintEventHandler(this.m_BitmapView_BeforePaint);
             // 
             // m_TableLayoutPanel
             // 
@@ -179,7 +180,7 @@
             // 
             // m_RedrawTimer
             // 
-            this.m_RedrawTimer.Interval = 1;
+            this.m_RedrawTimer.Interval = 30;
             this.m_RedrawTimer.Tick += new System.EventHandler(this.m_RedrawTimer_Tick);
             // 
             // SimulatorView

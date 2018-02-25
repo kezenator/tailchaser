@@ -68,6 +68,12 @@ namespace Com.TailChaser.Editor.Model.Serialize
             m_CurLine.Add((byte)value);
         }
 
+        public void WriteUint16(int value)
+        {
+            m_CurLine.Add((byte)value);
+            m_CurLine.Add((byte)(value >> 8));
+        }
+
         public void WriteLengthAndUtf8String(string value, string error_msg)
         {
             try

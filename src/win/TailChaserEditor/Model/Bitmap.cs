@@ -84,14 +84,49 @@ namespace Com.TailChaser.Editor.Model
             }
         }
 
-        public void CombineWith(Bitmap other)
+        public void CombineWith(Bitmap source)
         {
-            Debug.Assert(m_Palette.Equals(other.m_Palette));
+            Debug.Assert(m_Palette.Equals(source.m_Palette));
 
             for (int i = 0; i < m_Pixels.Length; ++i)
             {
-                if (!other.m_Palette.IsTransparent(other.m_Pixels[i]))
-                    m_Pixels[i] = other.m_Pixels[i];
+                if (!source.m_Palette.IsTransparent(source.m_Pixels[i]))
+                    m_Pixels[i] = source.m_Pixels[i];
+            }
+        }
+
+        public void CombineWith(int dest_x, int dest_y, int width, int height, Bitmap source, int source_x, int source_y)
+        {
+            Debug.Assert(m_Palette.Equals(source.m_Palette));
+
+            for (int iy = 0; iy < height; ++iy)
+            {
+                int dy = dest_y + iy;
+                int sy = source_y + iy;
+
+                if ((dy >= 0)
+                    && (dy < HEIGHT)
+                    && (sy >= 0)
+                    && (sy < HEIGHT))
+                {
+                    for (int ix = 0; ix < width; ++ix)
+                    {
+                        int dx = dest_x + ix;
+                        int sx = source_x + ix;
+
+                        if ((dx >= 0)
+                            && (dx < WIDTH)
+                            && (sx >= 0)
+                            && (sx < WIDTH))
+                        {
+                            int dindex = dx + WIDTH * dy;
+                            int sindex = sx + WIDTH * sy;
+
+                            if (!source.m_Palette.IsTransparent(source.m_Pixels[sindex]))
+                                m_Pixels[dindex] = source.m_Pixels[sindex];
+                        }
+                    }
+                }
             }
         }
 

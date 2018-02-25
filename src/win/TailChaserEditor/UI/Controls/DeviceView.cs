@@ -18,11 +18,31 @@ namespace Com.TailChaser.Editor.UI.Controls
         {
             InitializeComponent();
 
+            m_Scheme = null;
+
             m_FoundDevice = "";
             m_RecievedData = "";
             m_Upload = null;
 
             PerformDisconnect();
+        }
+
+        public Model.Scheme Scheme
+        {
+            get
+            {
+                return m_Scheme;
+            }
+
+            set
+            {
+                m_Scheme = value;
+
+                m_UploadBtn.Enabled =
+                    m_Connected
+                    && (m_Scheme != null)
+                    && (m_Upload == null);
+            }
         }
 
         public void ToggleSignal(Model.SignalMask mask)
@@ -53,8 +73,16 @@ namespace Com.TailChaser.Editor.UI.Controls
             }
         }
 
-        public void Upload(byte [] data)
+        public void Upload()
         {
+            if (m_Scheme == null)
+            {
+                // Ignore
+                return;
+            }
+
+            byte[] data = Model.Serialize.CCodeFileFormat.SerializeBinary(m_Scheme);
+
             if (m_Upload != null)
             {
                 MessageBox.Show("Download already in progress", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -73,6 +101,7 @@ namespace Com.TailChaser.Editor.UI.Controls
             }
             else
             {
+                m_UploadBtn.Enabled = false;
                 m_Upload = new byte[data.Length + 2];
                 m_Upload[0] = (byte)(data.Length);
                 m_Upload[1] = (byte)(data.Length >> 8);
@@ -153,6 +182,8 @@ namespace Com.TailChaser.Editor.UI.Controls
             m_IndicatorLabel.BackColor = SystemColors.Control;
 
             m_StatusTextBox.Text = "Discovering...";
+
+            m_UploadBtn.Enabled = false;
 
             // Clear down internal state
 
@@ -255,11 +286,18 @@ namespace Com.TailChaser.Editor.UI.Controls
                 if (m_Connected == false)
                 {
                     m_Connected = true;
+
                     m_StatusTextBox.Text = "Connected via " + m_FoundDevice;
+
                     m_TailButton.Enabled = true;
                     m_BrakeButton.Enabled = true;
                     m_ReverseButton.Enabled = true;
                     m_IndicatorButton.Enabled = true;
+
+                    m_UploadBtn.Enabled =
+                        m_Connected
+                        && (m_Scheme != null)
+                        && (m_Upload == null);
                 }
 
                 if (line.Contains('T'))
@@ -301,6 +339,11 @@ namespace Com.TailChaser.Editor.UI.Controls
                 if (m_UploadIndex >= m_Upload.Length)
                 {
                     m_Upload = null;
+
+                    m_UploadBtn.Enabled =
+                        m_Connected
+                        && (m_Scheme != null)
+                        && (m_Upload == null);
 
                     try
                     {
@@ -375,6 +418,11 @@ namespace Com.TailChaser.Editor.UI.Controls
             ToggleSignal(Model.SignalMask.IndicatorSolid);
         }
 
+        private void m_UploadBtn_Click(object sender, EventArgs e)
+        {
+            Upload();
+        }
+
         private void WriteLine(string tx_str)
         {
             try
@@ -414,6 +462,7 @@ namespace Com.TailChaser.Editor.UI.Controls
         private static int FLASH_PAGE_SIZE = 256;
         private static int NUM_FLASH_PAGES = 6;
 
+        private Model.Scheme m_Scheme;
         private string m_FoundDevice;
         private bool m_Connected;
         private int m_HeartbeatsSinceResponse;

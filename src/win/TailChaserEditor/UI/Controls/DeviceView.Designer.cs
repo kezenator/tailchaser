@@ -44,6 +44,7 @@
             this.m_BrakeLabel = new System.Windows.Forms.Label();
             this.m_ReverseLabel = new System.Windows.Forms.Label();
             this.m_IndicatorLabel = new System.Windows.Forms.Label();
+            this.m_UploadBtn = new System.Windows.Forms.Button();
             label1 = new System.Windows.Forms.Label();
             this.m_TableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
@@ -95,7 +96,7 @@
             this.m_StatusTextBox.Location = new System.Drawing.Point(3, 21);
             this.m_StatusTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_StatusTextBox.Name = "m_StatusTextBox";
-            this.m_StatusTextBox.Size = new System.Drawing.Size(624, 25);
+            this.m_StatusTextBox.Size = new System.Drawing.Size(465, 25);
             this.m_StatusTextBox.TabIndex = 2;
             this.m_StatusTextBox.Text = "Discovering...";
             // 
@@ -214,10 +215,22 @@
             this.m_IndicatorLabel.Text = "label4";
             this.m_IndicatorLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // m_UploadBtn
+            // 
+            this.m_UploadBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_UploadBtn.Location = new System.Drawing.Point(474, 3);
+            this.m_UploadBtn.Name = "m_UploadBtn";
+            this.m_UploadBtn.Size = new System.Drawing.Size(154, 43);
+            this.m_UploadBtn.TabIndex = 5;
+            this.m_UploadBtn.Text = "Upload (F2)";
+            this.m_UploadBtn.UseVisualStyleBackColor = true;
+            this.m_UploadBtn.Click += new System.EventHandler(this.m_UploadBtn_Click);
+            // 
             // DeviceView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.m_UploadBtn);
             this.Controls.Add(this.m_TableLayoutPanel);
             this.Controls.Add(this.m_StatusTextBox);
             this.Controls.Add(label1);
@@ -248,5 +261,6 @@
         private System.Windows.Forms.Label m_BrakeLabel;
         private System.Windows.Forms.Label m_ReverseLabel;
         private System.Windows.Forms.Label m_IndicatorLabel;
+        private System.Windows.Forms.Button m_UploadBtn;
     }
 }

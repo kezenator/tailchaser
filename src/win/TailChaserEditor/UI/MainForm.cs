@@ -23,6 +23,7 @@ namespace Com.TailChaser.Editor.UI
             m_Scheme = new Model.Scheme(m_PaletteView.Palette);
             m_SchemeView.Scheme = m_Scheme;
             m_SimulatorView.Scheme = m_Scheme;
+            m_DeviceView.Scheme = m_Scheme;
 
             m_HasFilePath = false;
             m_FileName = "<UNTITLED>";
@@ -37,7 +38,7 @@ namespace Com.TailChaser.Editor.UI
         private void m_FileUploadMenuItem_Click(object sender, EventArgs e)
         {
             m_MainTabs.SelectedIndex = 2;
-            m_DeviceView.Upload(Model.Serialize.CCodeFileFormat.SerializeBinary(m_Scheme));
+            m_DeviceView.Upload();
         }
 
         private void m_EditUndoMenuItem_Click(object sender, EventArgs e)
@@ -107,6 +108,45 @@ namespace Com.TailChaser.Editor.UI
             m_DeviceView.ToggleSignal(signal_mask);
         }
 
+        private void m_FileNewMenuItem_Click(object sender, EventArgs e)
+        {
+            if (m_UndoRedoBuffer.UndoAvailable)
+            {
+                switch (MessageBox.Show(
+                    "Want to save changes to your document?",
+                    "Confirm",
+                    MessageBoxButtons.YesNoCancel))
+                {
+                    case DialogResult.Yes:
+                        if (m_HasFilePath)
+                            m_FileSaveMenuItem_Click(sender, e);
+                        else
+                            m_FileSaveAsMenuItem_Click(sender, e);
+                        break;
+
+                    case DialogResult.No:
+                        // Continue
+                        break;
+
+                    case DialogResult.Cancel:
+                        return;
+                }
+            }
+
+            Model.Scheme new_scheme = new Model.Scheme(m_PaletteView.Palette);
+
+            m_HasFilePath = false;
+            m_FilePath = "<UNTITLED>";
+
+            m_Scheme = new_scheme;
+            m_SchemeView.Scheme = new_scheme;
+            m_SimulatorView.Scheme = new_scheme;
+            m_DeviceView.Scheme = new_scheme;
+
+            m_UndoRedoBuffer.Clear();
+            UpdateTitleBar();
+        }
+
         private void m_FileOpenMenuItem_Click(object sender, EventArgs e)
         {
             if (m_OpenFileDialog.ShowDialog() == DialogResult.OK)
@@ -124,6 +164,7 @@ namespace Com.TailChaser.Editor.UI
                     m_Scheme = new_scheme;
                     m_SchemeView.Scheme = new_scheme;
                     m_SimulatorView.Scheme = new_scheme;
+                    m_DeviceView.Scheme = new_scheme;
 
                     m_UndoRedoBuffer.Clear();
                     UpdateTitleBar();

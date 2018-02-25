@@ -15,6 +15,8 @@ namespace Com.TailChaser.Editor.UI.Controls
     {
         public BitmapView()
         {
+            m_InOnPaint = 0;
+
             InitializeComponent();
 
             SetStyle(ControlStyles.Opaque, true);
@@ -25,6 +27,8 @@ namespace Com.TailChaser.Editor.UI.Controls
             m_EditingBitmap = null;
             m_UndoRedoBuffer = null;
         }
+
+        public event PaintEventHandler BeforePaint;
 
         public PaletteView PaletteView
         {
@@ -58,7 +62,8 @@ namespace Com.TailChaser.Editor.UI.Controls
             {
                 m_DisplayedBitmap = value;
 
-                Invalidate();
+                if (m_InOnPaint == 0)
+                    Invalidate();
 
                 UpdateSelectedEditingBitmap();
             }
@@ -79,56 +84,70 @@ namespace Com.TailChaser.Editor.UI.Controls
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            // Draw transparent
-
-            using (Brush b = new HatchBrush(HatchStyle.DarkDownwardDiagonal, Color.LightGray, Color.Gray))
-                e.Graphics.FillRectangle(b, 0, 0, Width, Height);
-
-            // Draw bitmap's non-transparent pixels (if any...)
-
-            if (m_DisplayedBitmap != null)
+            try
             {
-                for (int x = 0; x < m_DisplayedBitmap.Width; ++x)
-                {
-                    for (int y = 0; y < m_DisplayedBitmap.Height; ++y)
-                    {
-                        int palette_index = m_DisplayedBitmap[x, y];
+                m_InOnPaint += 1;
 
-                        if (!m_DisplayedBitmap.Palette.IsTransparent(palette_index))
-                        {
-                            Rectangle rect = new Rectangle(
-                                x * Width / m_DisplayedBitmap.Width,
-                                y * Height / m_DisplayedBitmap.Height,
-                                Width / m_DisplayedBitmap.Width + 1,
-                                Height / m_DisplayedBitmap.Height + 1);
+                // Let the user know we're about to pain
 
-                            using (Brush b = new SolidBrush(m_DisplayedBitmap.Palette[palette_index]))
-                                e.Graphics.FillRectangle(b, rect);
-                        }
-                    }
-                }
-            }
+                if (BeforePaint != null)
+                    BeforePaint(this, e);
 
-            // Grids and Border
+                // Draw transparent
 
-            using (Pen p = new Pen(Color.FromKnownColor(KnownColor.WindowFrame), 1.0f))
-            {
+                using (Brush b = new HatchBrush(HatchStyle.DarkDownwardDiagonal, Color.LightGray, Color.Gray))
+                    e.Graphics.FillRectangle(b, 0, 0, Width, Height);
+
+                // Draw bitmap's non-transparent pixels (if any...)
+
                 if (m_DisplayedBitmap != null)
                 {
                     for (int x = 0; x < m_DisplayedBitmap.Width; ++x)
                     {
-                        int px = x * Width / m_DisplayedBitmap.Width;
-                        e.Graphics.DrawLine(p, px, 0, px, Height);
-                    }
+                        for (int y = 0; y < m_DisplayedBitmap.Height; ++y)
+                        {
+                            int palette_index = m_DisplayedBitmap[x, y];
 
-                    for (int y = 0; y < m_DisplayedBitmap.Height; ++y)
-                    {
-                        int py = y * Height / m_DisplayedBitmap.Height;
-                        e.Graphics.DrawLine(p, 0, py, Width, py);
+                            if (!m_DisplayedBitmap.Palette.IsTransparent(palette_index))
+                            {
+                                Rectangle rect = new Rectangle(
+                                    x * Width / m_DisplayedBitmap.Width,
+                                    y * Height / m_DisplayedBitmap.Height,
+                                    Width / m_DisplayedBitmap.Width + 1,
+                                    Height / m_DisplayedBitmap.Height + 1);
+
+                                using (Brush b = new SolidBrush(m_DisplayedBitmap.Palette[palette_index]))
+                                    e.Graphics.FillRectangle(b, rect);
+                            }
+                        }
                     }
                 }
 
-                e.Graphics.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
+                // Grids and Border
+
+                using (Pen p = new Pen(Color.FromKnownColor(KnownColor.WindowFrame), 1.0f))
+                {
+                    if (m_DisplayedBitmap != null)
+                    {
+                        for (int x = 0; x < m_DisplayedBitmap.Width; ++x)
+                        {
+                            int px = x * Width / m_DisplayedBitmap.Width;
+                            e.Graphics.DrawLine(p, px, 0, px, Height);
+                        }
+
+                        for (int y = 0; y < m_DisplayedBitmap.Height; ++y)
+                        {
+                            int py = y * Height / m_DisplayedBitmap.Height;
+                            e.Graphics.DrawLine(p, 0, py, Width, py);
+                        }
+                    }
+
+                    e.Graphics.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
+                }
+            }
+            finally
+            {
+                m_InOnPaint -= 1;
             }
 
             // Allow user override
@@ -254,5 +273,6 @@ namespace Com.TailChaser.Editor.UI.Controls
         private Model.Bitmap m_DisplayedBitmap;
         private Model.Bitmap m_EditingBitmap;
         private UndoRedoBuffer m_UndoRedoBuffer;
+        private UInt64 m_InOnPaint;
     }
 }

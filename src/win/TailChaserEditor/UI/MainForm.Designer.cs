@@ -30,13 +30,16 @@
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-            Com.TailChaser.Editor.Model.Palette palette1 = new Com.TailChaser.Editor.Model.Palette();
             System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+            System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+            Com.TailChaser.Editor.Model.Palette palette1 = new Com.TailChaser.Editor.Model.Palette();
             this.m_MenuStrip = new System.Windows.Forms.MenuStrip();
             this.m_FileMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.m_FileNewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_FileOpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_FileSaveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_FileSaveAsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.m_FileUploadMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_FileExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_EditMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.m_EditUndoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,9 +66,9 @@
             this.m_DeviceView = new Com.TailChaser.Editor.UI.Controls.DeviceView();
             this.m_SaveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.m_OpenFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.m_FileUploadMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.m_MenuStrip.SuspendLayout();
             this.m_MainTabs.SuspendLayout();
             this.m_EditTab.SuspendLayout();
@@ -76,7 +79,17 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(128, 6);
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(128, 6);
+            // 
+            // toolStripSeparator3
+            // 
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new System.Drawing.Size(128, 6);
             // 
             // m_MenuStrip
             // 
@@ -94,6 +107,8 @@
             // m_FileMenu
             // 
             this.m_FileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.m_FileNewMenuItem,
+            toolStripSeparator3,
             this.m_FileOpenMenuItem,
             this.m_FileSaveMenuItem,
             this.m_FileSaveAsMenuItem,
@@ -105,31 +120,46 @@
             this.m_FileMenu.Size = new System.Drawing.Size(37, 20);
             this.m_FileMenu.Text = "&File";
             // 
+            // m_FileNewMenuItem
+            // 
+            this.m_FileNewMenuItem.Name = "m_FileNewMenuItem";
+            this.m_FileNewMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.m_FileNewMenuItem.Text = "&New";
+            this.m_FileNewMenuItem.Click += new System.EventHandler(this.m_FileNewMenuItem_Click);
+            // 
             // m_FileOpenMenuItem
             // 
             this.m_FileOpenMenuItem.Name = "m_FileOpenMenuItem";
-            this.m_FileOpenMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileOpenMenuItem.Size = new System.Drawing.Size(131, 22);
             this.m_FileOpenMenuItem.Text = "&Open...";
             this.m_FileOpenMenuItem.Click += new System.EventHandler(this.m_FileOpenMenuItem_Click);
             // 
             // m_FileSaveMenuItem
             // 
             this.m_FileSaveMenuItem.Name = "m_FileSaveMenuItem";
-            this.m_FileSaveMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileSaveMenuItem.Size = new System.Drawing.Size(131, 22);
             this.m_FileSaveMenuItem.Text = "&Save";
             this.m_FileSaveMenuItem.Click += new System.EventHandler(this.m_FileSaveMenuItem_Click);
             // 
             // m_FileSaveAsMenuItem
             // 
             this.m_FileSaveAsMenuItem.Name = "m_FileSaveAsMenuItem";
-            this.m_FileSaveAsMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileSaveAsMenuItem.Size = new System.Drawing.Size(131, 22);
             this.m_FileSaveAsMenuItem.Text = "Save &as...";
             this.m_FileSaveAsMenuItem.Click += new System.EventHandler(this.m_FileSaveAsMenuItem_Click);
+            // 
+            // m_FileUploadMenuItem
+            // 
+            this.m_FileUploadMenuItem.Name = "m_FileUploadMenuItem";
+            this.m_FileUploadMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
+            this.m_FileUploadMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.m_FileUploadMenuItem.Text = "&Upload";
+            this.m_FileUploadMenuItem.Click += new System.EventHandler(this.m_FileUploadMenuItem_Click);
             // 
             // m_FileExitMenuItem
             // 
             this.m_FileExitMenuItem.Name = "m_FileExitMenuItem";
-            this.m_FileExitMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.m_FileExitMenuItem.Size = new System.Drawing.Size(131, 22);
             this.m_FileExitMenuItem.Text = "E&xit";
             this.m_FileExitMenuItem.Click += new System.EventHandler(this.m_FileExitMenuItem_Click);
             // 
@@ -287,7 +317,7 @@
             this.m_LayerView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_LayerView.MinimumSize = new System.Drawing.Size(303, 262);
             this.m_LayerView.Name = "m_LayerView";
-            this.m_LayerView.Size = new System.Drawing.Size(303, 262);
+            this.m_LayerView.Size = new System.Drawing.Size(373, 262);
             this.m_LayerView.TabIndex = 9;
             this.m_LayerView.UndoRedoBuffer = this.m_UndoRedoBuffer;
             // 
@@ -361,6 +391,7 @@
             this.m_DeviceView.Location = new System.Drawing.Point(0, 0);
             this.m_DeviceView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.m_DeviceView.Name = "m_DeviceView";
+            this.m_DeviceView.Scheme = null;
             this.m_DeviceView.Size = new System.Drawing.Size(1170, 738);
             this.m_DeviceView.TabIndex = 0;
             // 
@@ -374,18 +405,6 @@
             this.m_OpenFileDialog.DefaultExt = "h";
             this.m_OpenFileDialog.FileName = "openFileDialog1";
             this.m_OpenFileDialog.Filter = "C/C++ Header Files|*.h|All Files|*.*";
-            // 
-            // m_FileUploadMenuItem
-            // 
-            this.m_FileUploadMenuItem.Name = "m_FileUploadMenuItem";
-            this.m_FileUploadMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.m_FileUploadMenuItem.Text = "&Upload";
-            this.m_FileUploadMenuItem.Click += new System.EventHandler(this.m_FileUploadMenuItem_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // MainForm
             // 
@@ -443,5 +462,6 @@
         private System.Windows.Forms.TabPage m_DevicePage;
         private Controls.DeviceView m_DeviceView;
         private System.Windows.Forms.ToolStripMenuItem m_FileUploadMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem m_FileNewMenuItem;
     }
 }

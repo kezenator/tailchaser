@@ -74,9 +74,6 @@ bool SchemeState::loadSchemeFromRam(const uint8_t *data, size_t max_length)
 
     uint16_t length = data[0] | (data[1] << 8);
 
-    Serial.print("LENGTH=");
-    Serial.println(length);
-
     if (max_length < (2 + length))
         return false;
 
@@ -100,9 +97,6 @@ bool SchemeState::loadSchemeFromRam(const uint8_t *data, size_t max_length)
     
     uint8_t layers = *data;
 
-    Serial.print("LAYERS=");
-    Serial.println(layers);
-
     if (layers > MAX_LAYERS)
         return false;
 
@@ -116,21 +110,20 @@ bool SchemeState::loadSchemeFromRam(const uint8_t *data, size_t max_length)
         if (!skipString(data, length))
             return false;
 
-        if (length < (2 + BITMAP_BYTES))
+        if (length < (9 + BITMAP_BYTES))
             return false;
 
         m_layers[i].m_currentlyDisplayed = false;
         m_layers[i].m_conditionMask = data[0];
         m_layers[i].m_conditionValue = data[1];
-        m_layers[i].m_bitmapBase = data + 2;
+        m_layers[i].m_pattern = data[2];
+        m_layers[i].m_field1 = data[3] | (uint16_t(data[4]) << 8);
+        m_layers[i].m_field2 = data[5] | (uint16_t(data[6]) << 8);
+        m_layers[i].m_field3 = data[7] | (uint16_t(data[8]) << 8);
+        m_layers[i].m_bitmapBase = data + 9;
 
-        data += (2 + BITMAP_BYTES);
-        length -= (2 + BITMAP_BYTES);
-
-        Serial.print("READ ");
-        Serial.print(i);
-        Serial.print(" LENGTH=");
-        Serial.println(length);
+        data += (9 + BITMAP_BYTES);
+        length -= (9 + BITMAP_BYTES);
     }
 
     if (length != 0)
@@ -164,12 +157,102 @@ bool SchemeState::update(const SignalState &signal_state)
 
     for (uint8_t i = 0; i < m_numLayers; ++i)
     {
+        // First, update if this layer needs to be displayed or not
+        
         bool needs_display = signal_state.matchesLayerMask(m_layers[i].m_conditionMask, m_layers[i].m_conditionValue);
 
         if (needs_display != m_layers[i].m_currentlyDisplayed)
         {
             m_layers[i].m_currentlyDisplayed = needs_display;
+            m_layers[i].m_startMillis = millis();
+            m_layers[i].m_pixels = 0;
             updated = true;
+        }
+
+        // Now update it's position on screen
+
+        if (m_layers[i].m_currentlyDisplayed)
+        {
+            unsigned long duration = millis() - m_layers[i].m_startMillis;
+            uint8_t new_pixels = m_layers[i].m_pixels;
+
+            switch (m_layers[i].m_pattern)
+            {
+            case SOLID:
+                new_pixels = Matrix::WIDTH;
+                break;
+                
+            case FLASH:
+                // Field1 = on time (ms)
+                // Field2 = off time (ms)
+                if ((m_layers[i].m_field1 != 0)
+                    || (m_layers[i].m_field2 != 0))
+                {
+                    if ((duration % (m_layers[i].m_field1 + m_layers[i].m_field2)) <= m_layers[i].m_field1)
+                        new_pixels = Matrix::WIDTH;
+                    else
+                        new_pixels = 0;
+                }
+                break;
+                
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+            case SWIPE_DOWN:
+            case SWIPE_UP:
+                // Field1 = swipe time (ms)
+                // Field2 = on time (ms)
+                // Field3 = off time (ms)
+                if ((m_layers[i].m_field1 != 0)
+                    || (m_layers[i].m_field2 != 0)
+                    || (m_layers[i].m_field3 != 0))
+                {
+                    unsigned long dimension = Matrix::WIDTH;
+                    if ((m_layers[i].m_pattern == SWIPE_DOWN)
+                        || (m_layers[i].m_pattern == SWIPE_UP))
+                    {
+                        dimension = Matrix::HEIGHT;
+                    }
+
+                    unsigned long progress = duration
+                        % (m_layers[i].m_field1 + m_layers[i].m_field2 + m_layers[i].m_field3);
+
+                    if (progress < m_layers[i].m_field1)
+                        new_pixels = uint8_t(progress * dimension / m_layers[i].m_field1);
+                    else if (progress <= (m_layers[i].m_field1 + m_layers[i].m_field2))
+                        new_pixels = dimension;
+                    else
+                        new_pixels = 0;
+                }
+                break;
+
+            case SCROLL_LEFT:
+            case SCROLL_RIGHT:
+            case SCROLL_DOWN:
+            case SCROLL_UP:
+                // Field1 = scroll time (ms)
+                // Field2 = size (pixels)
+                // Field3 = N/A
+                
+                if ((m_layers[i].m_field1 != 0)
+                    && (m_layers[i].m_field2 != 0))
+                {
+                    unsigned long dimension = Matrix::WIDTH;
+                    if ((m_layers[i].m_pattern == SCROLL_DOWN)
+                        || (m_layers[i].m_pattern == SCROLL_UP))
+                    {
+                        dimension = Matrix::HEIGHT;
+                    }
+
+                    new_pixels = uint8_t((duration % m_layers[i].m_field1) * m_layers[i].m_field2 / m_layers[i].m_field1);
+                }
+                break;
+            }
+
+            if (new_pixels != m_layers[i].m_pixels)
+            {
+                m_layers[i].m_pixels = new_pixels;
+                updated = true;
+            }
         }
     }
 
@@ -192,38 +275,138 @@ void SchemeState::draw(Matrix &matrix)
 
             for (uint8_t row = 0; row < Matrix::HEIGHT; ++row)
             {
-                // We have 5-bit values packet into 8-bit bytes -
-                // so we read 5 bytes, 8 pixels at a time
-
-                for (uint8_t column = 0; column < Matrix::WIDTH; column += 8, data += 5)
+                switch (m_layers[i].m_pattern)
                 {
-                    uint8_t b1 = data[0];
-                    uint8_t b2 = data[1];
-                    uint8_t b3 = data[2];
-                    uint8_t b4 = data[3];
-                    uint8_t b5 = data[4];
+                case SOLID:
+                case FLASH:
+                case SWIPE_LEFT:
+                    decodeRow(data, row);
+                    for (uint8_t column = Matrix::WIDTH - m_layers[i].m_pixels; column < Matrix::WIDTH; ++column)
+                    {
+                        if (m_decodedRow[column] < PALETTE_SIZE)
+                            matrix.setPixel(column, row, PALETTE[m_decodedRow[column]]);
+                    }
+                    break;
 
-                    uint8_t color;
-                    
-                    color = b1 >> 3;
-                    if (color < PALETTE_SIZE) matrix.setPixel(column + 0, row, PALETTE[color]);
-                    color = ((b1 & 0x07) << 2) | (b2 >> 6);
-                    if (color < PALETTE_SIZE) matrix.setPixel(column + 1, row, PALETTE[color]);
-                    color = (b2 >> 1) & 0x1F;
-                    if (color < PALETTE_SIZE) matrix.setPixel(column + 2, row, PALETTE[color]);
-                    color = ((b2 << 4) & 0x10) | ((b3 >> 4) & 0x0F);
-                    if (color < PALETTE_SIZE) matrix.setPixel(column + 3, row, PALETTE[color]);
-                    color = ((b3 << 1) & 0x1E) | ((b4 >> 7) & 0x01);
-                    if (color < PALETTE_SIZE) matrix.setPixel(column + 4, row, PALETTE[color]);
-                    color = (b4 >> 2) & 0x1F;
-                    if (color < PALETTE_SIZE) matrix.setPixel(column + 5, row, PALETTE[color]);
-                    color = ((b4 << 3) & 0x18) | ((b5 >> 5) & 0x07);
-                    if (color < PALETTE_SIZE) matrix.setPixel(column + 6, row, PALETTE[color]);
-                    color = b5 & 0x1F;
-                    if (color < PALETTE_SIZE) matrix.setPixel(column + 7, row, PALETTE[color]);
+                case SWIPE_RIGHT:
+                    decodeRow(data, row);
+                    for (uint8_t column = 0; column < m_layers[i].m_pixels; ++column)
+                    {
+                        if (m_decodedRow[column] < PALETTE_SIZE)
+                            matrix.setPixel(column, row, PALETTE[m_decodedRow[column]]);
+                    }
+                    break;
+
+                case SWIPE_DOWN:
+                    if (row < m_layers[i].m_pixels)
+                    {
+                        decodeRow(data, row);
+                        for (uint8_t column = 0; column < Matrix::WIDTH; ++column)
+                        {
+                            if (m_decodedRow[column] < PALETTE_SIZE)
+                                matrix.setPixel(column, row, PALETTE[m_decodedRow[column]]);
+                        }
+                    }
+                    break;
+
+                case SWIPE_UP:
+                    if (row >= (Matrix::HEIGHT - m_layers[i].m_pixels))
+                    {
+                        decodeRow(data, row);
+                        for (uint8_t column = 0; column < Matrix::WIDTH; ++column)
+                        {
+                            if (m_decodedRow[column] < PALETTE_SIZE)
+                                matrix.setPixel(column, row, PALETTE[m_decodedRow[column]]);
+                        }
+                    }
+                    break;
+
+                case SCROLL_LEFT:
+                    if (m_layers[i].m_field2 != 0)
+                    {
+                        decodeRow(data, row);
+                        for (uint8_t column = 0; column < Matrix::WIDTH; ++column)
+                        {
+                            int src_column = (column + m_layers[i].m_pixels) % m_layers[i].m_field2 % Matrix::WIDTH;
+    
+                            if (m_decodedRow[src_column] < PALETTE_SIZE)
+                                matrix.setPixel(column, row, PALETTE[m_decodedRow[src_column]]);
+                        }
+                    }
+                    break;
+
+                case SCROLL_RIGHT:
+                    if (m_layers[i].m_field2 != 0)
+                    {
+                        decodeRow(data, row);
+                        for (uint8_t column = 0; column < Matrix::WIDTH; ++column)
+                        {
+                            int src_column = (column + m_layers[i].m_field2 - m_layers[i].m_pixels) % m_layers[i].m_field2 % Matrix::WIDTH;
+    
+                            if (m_decodedRow[src_column] < PALETTE_SIZE)
+                                matrix.setPixel(column, row, PALETTE[m_decodedRow[src_column]]);
+                        }
+                    }
+                    break;
+
+                case SCROLL_DOWN:
+                    if (m_layers[i].m_field2 != 0)
+                    {
+                        uint8_t src_row = uint8_t((row + m_layers[i].m_field2 - m_layers[i].m_pixels) % m_layers[i].m_field2 % Matrix::HEIGHT);
+                        
+                        decodeRow(data, src_row);
+                        for (uint8_t column = 0; column < Matrix::WIDTH; ++column)
+                        {
+                            if (m_decodedRow[column] < PALETTE_SIZE)
+                                matrix.setPixel(column, row, PALETTE[m_decodedRow[column]]);
+                        }
+                    }
+                    break;
+
+                case SCROLL_UP:
+                    if (m_layers[i].m_field2 != 0)
+                    {
+                        uint8_t src_row = uint8_t((row + m_layers[i].m_pixels) % m_layers[i].m_field2 % Matrix::HEIGHT);
+                        
+                        decodeRow(data, src_row);
+                        for (uint8_t column = 0; column < Matrix::WIDTH; ++column)
+                        {
+                            if (m_decodedRow[column] < PALETTE_SIZE)
+                                matrix.setPixel(column, row, PALETTE[m_decodedRow[column]]);
+                        }
+                    }
+                    break;
                 }
             }
         }
+    }
+}
+
+void SchemeState::decodeRow(const uint8_t *bitmap, uint8_t row)
+{
+    // There are 5-bit values packed into 8-bit types -
+    // so each 5 bytes of data contains 8 pixels
+    
+    const uint8_t *data = bitmap + (row * (Matrix::WIDTH / 8 * 5));
+
+    for (uint8_t column = 0; column < Matrix::WIDTH; column += 8, data += 5)
+    {
+        uint8_t b1 = data[0];
+        uint8_t b2 = data[1];
+        uint8_t b3 = data[2];
+        uint8_t b4 = data[3];
+        uint8_t b5 = data[4];
+
+        uint8_t color;
+        
+        m_decodedRow[column + 0] = b1 >> 3;
+        m_decodedRow[column + 1] = ((b1 & 0x07) << 2) | (b2 >> 6);
+        m_decodedRow[column + 2] = (b2 >> 1) & 0x1F;
+        m_decodedRow[column + 3] = ((b2 << 4) & 0x10) | ((b3 >> 4) & 0x0F);
+        m_decodedRow[column + 4] = ((b3 << 1) & 0x1E) | ((b4 >> 7) & 0x01);
+        m_decodedRow[column + 5] = (b4 >> 2) & 0x1F;
+        m_decodedRow[column + 6] = ((b4 << 3) & 0x18) | ((b5 >> 5) & 0x07);
+        m_decodedRow[column + 7] = b5 & 0x1F;
     }
 }
 

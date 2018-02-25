@@ -16,6 +16,12 @@ namespace Com.TailChaser.Editor.UI.Controls
         {
             InitializeComponent();
 
+            m_PatternCombo.Items.Clear();
+            foreach (Model.Pattern value in Enum.GetValues(typeof(Model.Pattern)))
+            {
+                m_PatternCombo.Items.Add(value.ToString());
+            }
+
             m_BitmapView = null;
             m_UndoRedoBuffer = null;
             m_Layer = null;
@@ -143,6 +149,21 @@ namespace Com.TailChaser.Editor.UI.Controls
                 {
                     m_BitmapView.Bitmap = null;
                 }
+
+                m_PatternCombo.SelectedIndex = 0;
+                m_PatternCombo.Enabled = false;
+
+                m_Field1Label.Text = "N/A";
+                m_Field1Text.Text = "";
+                m_Field1Text.Enabled = false;
+
+                m_Field2Label.Text = "N/A";
+                m_Field2Text.Text = "";
+                m_Field2Text.Enabled = false;
+
+                m_Field3Label.Text = "N/A";
+                m_Field3Text.Text = "";
+                m_Field3Text.Enabled = false;
             }
             else
             {
@@ -168,6 +189,56 @@ namespace Com.TailChaser.Editor.UI.Controls
                 {
                     m_BitmapView.Bitmap = m_Layer.Bitmap;
                 }
+
+                m_PatternCombo.SelectedIndex = (int)m_Layer.Pattern;
+                m_PatternCombo.Enabled = true;
+
+                m_Field1Text.Text = m_Layer.Field1.ToString();
+                m_Field1Text.Enabled = true;
+
+                m_Field2Text.Text = m_Layer.Field2.ToString();
+                m_Field2Text.Enabled = true;
+
+                m_Field3Text.Text = m_Layer.Field3.ToString();
+                m_Field3Text.Enabled = true;
+
+                UpdateFieldLabels();
+            }
+        }
+
+        private void UpdateFieldLabels()
+        {
+            switch (m_Layer.Pattern)
+            {
+                case Model.Pattern.Solid:
+                    m_Field1Label.Text = "N/A";
+                    m_Field2Label.Text = "N/A";
+                    m_Field3Label.Text = "N/A";
+                    break;
+
+                case Model.Pattern.Flashing:
+                    m_Field1Label.Text = "On Time (ms)";
+                    m_Field2Label.Text = "Off Time (ms)";
+                    m_Field3Label.Text = "N/A";
+                    break;
+
+                case Model.Pattern.SwipeLeft:
+                case Model.Pattern.SwipeRight:
+                case Model.Pattern.SwipeUp:
+                case Model.Pattern.SwipeDown:
+                    m_Field1Label.Text = "Swipe Time (ms)";
+                    m_Field2Label.Text = "On Time (ms)";
+                    m_Field3Label.Text = "Off Time (ms)";
+                    break;
+
+                case Model.Pattern.ScrollLeft:
+                case Model.Pattern.ScrollRight:
+                case Model.Pattern.ScrollUp:
+                case Model.Pattern.ScrollDown:
+                    m_Field1Label.Text = "Scroll Period (ms)";
+                    m_Field2Label.Text = "Size (pixels)";
+                    m_Field3Label.Text = "N/A";
+                    break;
             }
         }
 
@@ -203,17 +274,37 @@ namespace Com.TailChaser.Editor.UI.Controls
 
                 if (!new_value.Equals(old_value))
                 {
-                    UndoRedoBuffer.Entry entry = new SignalSetUndoEntry(m_UndoRedoBuffer, m_Layer, old_value, new_value);
-                    entry.PerformAndPushUndo();
+                    UpdateValues(m_Layer.Name, new_value, m_Layer.Pattern, m_Layer.Field1, m_Layer.Field2, m_Layer.Field3);
                 }
             }
+        }
+
+        private void UpdateValues(string name, Model.SignalSet signals, Model.Pattern pattern, UInt16 field_1, UInt16 field_2, UInt16 field_3)
+        {
+            UndoRedoBuffer.Entry entry = new LayerUndoEntry(
+                m_UndoRedoBuffer,
+                m_Layer,
+                m_Layer.Name,
+                m_Layer.SignalSet,
+                m_Layer.Pattern,
+                m_Layer.Field1,
+                m_Layer.Field2,
+                m_Layer.Field3,
+                name,
+                signals,
+                pattern,
+                field_1,
+                field_2,
+                field_3);
+
+            entry.PerformAndPushUndo();
         }
 
         private void m_NameTextBox_TextChanged(object sender, EventArgs e)
         {
             if (m_Layer != null)
             {
-                m_Layer.Name = m_NameTextBox.Text;
+                UpdateValues(m_NameTextBox.Text, m_Layer.SignalSet, m_Layer.Pattern, m_Layer.Field1, m_Layer.Field2, m_Layer.Field3);
             }
         }
 
@@ -242,29 +333,110 @@ namespace Com.TailChaser.Editor.UI.Controls
             UpdateLayerMask(Model.SignalMask.IndicatorSolid, m_IndicatorSolidCheckbox.CheckState);
         }
 
-        private class SignalSetUndoEntry : UndoRedoBuffer.Entry
+        private void m_PatternCombo_SelectedIndexChanged(object sender, EventArgs e)
         {
-            public SignalSetUndoEntry(UndoRedoBuffer parent, Model.Layer layer, Model.SignalSet old_value, Model.SignalSet new_value)
+            if (m_Layer != null)
+            {
+                Model.Pattern new_pattern = (Model.Pattern)m_PatternCombo.SelectedIndex;
+
+                UpdateFieldLabels();
+
+                if (new_pattern != m_Layer.Pattern)
+                    UpdateValues(m_Layer.Name, m_Layer.SignalSet, new_pattern, m_Layer.Field1, m_Layer.Field2, m_Layer.Field3);
+            }
+        }
+
+        private void m_Field1Text_TextChanged(object sender, EventArgs e)
+        {
+            if (m_Layer != null)
+            {
+                UInt16 value = 0;
+                UInt16.TryParse(m_Field1Text.Text, out value);
+
+                if (value != m_Layer.Field1)
+                    UpdateValues(m_Layer.Name, m_Layer.SignalSet, m_Layer.Pattern, value, m_Layer.Field2, m_Layer.Field3);
+            }
+        }
+
+        private void m_Field2Text_TextChanged(object sender, EventArgs e)
+        {
+            if (m_Layer != null)
+            {
+                UInt16 value = 0;
+                UInt16.TryParse(m_Field2Text.Text, out value);
+
+                if (value != m_Layer.Field2)
+                    UpdateValues(m_Layer.Name, m_Layer.SignalSet, m_Layer.Pattern, m_Layer.Field1, value, m_Layer.Field3);
+            }
+        }
+
+        private void m_Field3Text_TextChanged(object sender, EventArgs e)
+        {
+            if (m_Layer != null)
+            {
+                UInt16 value = 0;
+                UInt16.TryParse(m_Field3Text.Text, out value);
+
+                if (value != m_Layer.Field3)
+                    UpdateValues(m_Layer.Name, m_Layer.SignalSet, m_Layer.Pattern, m_Layer.Field1, m_Layer.Field2, value);
+            }
+        }
+
+        private class LayerUndoEntry : UndoRedoBuffer.Entry
+        {
+            public LayerUndoEntry(UndoRedoBuffer parent, Model.Layer layer,
+                string old_name, Model.SignalSet old_signals, Model.Pattern old_pattern, UInt16 old_field_1, UInt16 old_field_2, UInt16 old_field_3,
+                string new_name, Model.SignalSet new_signals, Model.Pattern new_pattern, UInt16 new_field_1, UInt16 new_field_2, UInt16 new_field_3)
                 : base(parent)
             {
                 m_Layer = layer;
-                m_OldValue = old_value;
-                m_NewValue = new_value;
+                m_OldName = old_name;
+                m_OldSignals = old_signals;
+                m_OldPattern = old_pattern;
+                m_OldField1 = old_field_1;
+                m_OldField2 = old_field_2;
+                m_OldField3 = old_field_3;
+                m_NewName = new_name;
+                m_NewSignals = new_signals;
+                m_NewPattern = new_pattern;
+                m_NewField1 = new_field_1;
+                m_NewField2 = new_field_2;
+                m_NewField3 = new_field_3;
             }
 
             public override void Undo()
             {
-                m_Layer.SignalSet = m_OldValue;
+                m_Layer.Name = m_OldName;
+                m_Layer.SignalSet = m_OldSignals;
+                m_Layer.Pattern = m_OldPattern;
+                m_Layer.Field1 = m_OldField1;
+                m_Layer.Field2 = m_OldField2;
+                m_Layer.Field3 = m_OldField3;
             }
 
             public override void Redo()
             {
-                m_Layer.SignalSet = m_NewValue;
+                m_Layer.Name = m_NewName;
+                m_Layer.SignalSet = m_NewSignals;
+                m_Layer.Pattern = m_NewPattern;
+                m_Layer.Field1 = m_NewField1;
+                m_Layer.Field2 = m_NewField2;
+                m_Layer.Field3 = m_NewField3;
             }
 
             private Model.Layer m_Layer;
-            private Model.SignalSet m_OldValue;
-            private Model.SignalSet m_NewValue;
+            private string m_OldName;
+            private Model.SignalSet m_OldSignals;
+            private Model.Pattern m_OldPattern;
+            private UInt16 m_OldField1;
+            private UInt16 m_OldField2;
+            private UInt16 m_OldField3;
+            private string m_NewName;
+            private Model.SignalSet m_NewSignals;
+            private Model.Pattern m_NewPattern;
+            private UInt16 m_NewField1;
+            private UInt16 m_NewField2;
+            private UInt16 m_NewField3;
         }
 
         private BitmapView m_BitmapView;

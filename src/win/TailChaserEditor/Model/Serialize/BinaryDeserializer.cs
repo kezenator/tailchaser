@@ -23,6 +23,14 @@ namespace Com.TailChaser.Editor.Model.Serialize
             return m_Bytes[m_Index - 1];
         }
 
+        public UInt16 ReadUint16()
+        {
+            return (UInt16)(
+                (UInt16)ReadUint8()
+                | (((UInt16)ReadUint8()) << 8)
+            );
+        }
+
         public byte[] ReadBytes(int length)
         {
             if ((m_Index >= m_Bytes.Length)

@@ -20,7 +20,7 @@ namespace Com.TailChaser.Editor.Model.Serialize
                 "",
                 "TailChaser scheme \"" + scheme.Name + "\"",
                 "",
-                "Format: TailChaser Scheme, version 2018-02-03" });
+                "Format: TailChaser Scheme, version 2018-02-18" });
             s.AddLine("#ifndef __SCHEME__" + scheme.Name + "_H__");
             s.AddLine("#define __SCHEME__" + scheme.Name + "_H__");
             s.AddLine("#include <avr/pgmspace.h>");
@@ -62,6 +62,14 @@ namespace Com.TailChaser.Editor.Model.Serialize
                 bs.WriteBytes(new byte[] { l.SignalSet.GetMaskAsByte(), l.SignalSet.GetValueAsByte() });
                 bs.CommitLine(l.SignalSet.ToString());
 
+                bs.WriteIntAsUint8((int)l.Pattern, "Invalid pattern value");
+                bs.CommitLine(l.Pattern.ToString());
+
+                bs.WriteUint16(l.Field1);
+                bs.WriteUint16(l.Field2);
+                bs.WriteUint16(l.Field3);
+                bs.CommitLine(string.Format("Fields 1={0}, 2={1}, 3={2}", l.Field1, l.Field2, l.Field3));
+
                 WriteBitmap(l.Bitmap, bs);
             }
 
@@ -77,7 +85,14 @@ namespace Com.TailChaser.Editor.Model.Serialize
             tds.ExpectLine(" *");
             string name = tds.DecodeExpectedLine(" * TailChaser scheme \"", "\"");
             tds.ExpectLine(" *");
-            tds.ExpectLine(" * Format: TailChaser Scheme, version 2018-02-03");
+            string version = tds.DecodeExpectedLine(" * Format: TailChaser Scheme, version ", "");
+
+            if (!version.Equals("2018-02-03")
+                && !version.Equals("2018-02-18"))
+            {
+                throw new FormatException("Unsupported version: " + version);
+            }
+
             tds.ExpectLine(" */");
             tds.ExpectLine("#ifndef __SCHEME__" + name + "_H__");
             tds.ExpectLine("#define __SCHEME__" + name + "_H__");
@@ -118,6 +133,23 @@ namespace Com.TailChaser.Editor.Model.Serialize
 
                 layer.Name = bds.ReadString();
                 layer.SignalSet = SignalSet.FromMaskAndValue(bds.ReadUint8(), bds.ReadUint8());
+
+                if (version.Equals("2018-02-03"))
+                {
+                    // Only solid supported in this version
+                    layer.Pattern = Pattern.Solid;
+                    layer.Field1 = 0;
+                    layer.Field2 = 0;
+                    layer.Field3 = 0;
+                }
+                else
+                {
+                    layer.Pattern = (Pattern)bds.ReadUint8();
+                    layer.Field1 = bds.ReadUint16();
+                    layer.Field2 = bds.ReadUint16();
+                    layer.Field3 = bds.ReadUint16();
+                }
+
                 ReadBitmap(layer.Bitmap, bds.ReadBytes(320));
             }
 

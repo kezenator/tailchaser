@@ -77,6 +77,7 @@
     <Compile Include="Model\Bitmap.cs" />
     <Compile Include="Model\Layer.cs" />
     <Compile Include="Model\Palette.cs" />
+    <Compile Include="Model\Pattern.cs" />
     <Compile Include="Model\Scheme.cs" />
     <Compile Include="Model\Serialize\BinaryDeserializer.cs" />
     <Compile Include="Model\Serialize\BinarySerializer.cs" />
